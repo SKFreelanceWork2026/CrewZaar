@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import {
   AppBar,
   Toolbar,
-  Typography,
   Button,
   Box,
   Container,
@@ -14,6 +13,7 @@ import {
   ListItemButton,
   ListItemText,
 } from "@mui/material";
+import logo from "../../../assets/images/Logo.jpeg";
 
 import MenuIcon from "@mui/icons-material/Menu";
 import LoginIcon from "@mui/icons-material/Login";
@@ -29,47 +29,104 @@ const navItems = [
 
 function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [activeItem, setActiveItem] = useState("Home");
 
   const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
+    setMobileOpen((prev) => !prev);
+  };
+
+  const handleNavClick = (item) => {
+    setActiveItem(item);
   };
 
   const drawer = (
-    <Box
-      sx={{
-        width: 250,
-        paddingTop: 2,
-      }}
-      onClick={handleDrawerToggle}
-    >
+    <Box sx={{ width: 250, paddingTop: 2 }}>
       <List>
         {navItems.map((item) => (
           <ListItem key={item} disablePadding>
-            <ListItemButton>
-              <ListItemText primary={item} />
+            <ListItemButton
+              onClick={() => {
+                handleNavClick(item);
+                handleDrawerToggle();
+              }}
+              sx={{
+                justifyContent: "center",
+                mx: 1,
+                borderRadius: "8px",
+                transition: "background-color 0.25s ease",
+                backgroundColor:
+                  activeItem === item ? "#f0fae8" : "transparent",
+                "&:hover": {
+                  backgroundColor: "#f0fae8",
+                  "& .nav-label": { color: "#4CAF0A" },
+                },
+              }}
+            >
+              <ListItemText
+                primary={item}
+                slotProps={{
+                  primary: {
+                    className: "nav-label",
+                    sx: {
+                      textAlign: "center",
+                      fontWeight: activeItem === item ? 700 : 500,
+                      color: activeItem === item ? "#4CAF0A" : "#444",
+                      transition: "color 0.25s ease",
+                    },
+                  },
+                }}
+              />
             </ListItemButton>
           </ListItem>
         ))}
 
+        {/* Login */}
         <ListItem disablePadding>
-          <ListItemButton>
-            <LoginIcon sx={{ marginRight: 1 }} />
-            <ListItemText primary="Login" />
+          <ListItemButton
+            onClick={handleDrawerToggle}
+            sx={{
+              justifyContent: "center",
+              mx: 1,
+              borderRadius: "8px",
+              "&:hover": { backgroundColor: "#f0fae8" },
+            }}
+          >
+            <LoginIcon sx={{ marginRight: 1, color: "#555", fontSize: 20 }} />
+            <ListItemText
+              primary="Login"
+              slotProps={{
+                primary: {
+                  sx: {
+                    textAlign: "center",
+                    fontWeight: 500,
+                    color: "#444",
+                    flexGrow: 0,
+                  },
+                },
+              }}
+            />
           </ListItemButton>
         </ListItem>
 
-        <Box px={2} mt={2}>
+        {/* GET STARTED button — centered, auto width */}
+        <Box
+          mt={2}
+          mb={2}
+          sx={{ display: "flex", justifyContent: "center" }}
+        >
           <Button
-            fullWidth
             variant="contained"
+            onClick={handleDrawerToggle}
             sx={{
               backgroundColor: "#4CAF0A",
               borderRadius: "10px",
               fontWeight: "bold",
               paddingY: 1.2,
-              "&:hover": {
-                backgroundColor: "#43a008",
-              },
+              paddingX: 4,
+              fontSize: "14px",
+              textTransform: "uppercase",
+              "&:hover": { backgroundColor: "#43a008", boxShadow: "none" },
+              boxShadow: "none",
             }}
           >
             GET STARTED
@@ -99,50 +156,45 @@ function Header() {
             }}
           >
             {/* LOGO */}
-            <Box display="flex" alignItems="center">
-              <Box
-                component="img"
-                src="https://crewzaar.com/assets/logo.png"
-                alt="Crewzaar"
-                sx={{
-                  height: {
-                    xs: 38,
-                    sm: 42,
-                    md: 48,
-                  },
-                  objectFit: "contain",
-                }}
-              />
-            </Box>
+<Box display="flex" alignItems="center">
+  <Box
+    component="img"
+    src={logo}
+    alt="Crewzaar"
+    sx={{
+      height: { xs: 38, sm: 42, md: 48 },
+      objectFit: "contain",
+    }}
+  />
+</Box>
 
             {/* DESKTOP MENU */}
             <Box
               sx={{
-                display: {
-                  xs: "none",
-                  md: "flex",
-                },
+                display: { xs: "none", md: "flex" },
                 alignItems: "center",
                 gap: 4,
               }}
             >
-              {navItems.map((item, index) => (
+              {navItems.map((item) => (
                 <Button
                   key={item}
+                  onClick={() => handleNavClick(item)}
                   sx={{
-                    color: "#666",
+                    color: activeItem === item ? "#4CAF0A" : "#666",
                     fontSize: "15px",
-                    fontWeight: 500,
+                    fontWeight: activeItem === item ? 700 : 500,
                     textTransform: "none",
                     borderBottom:
-                      index === 0
-                        ? "2px solid #7CB342"
+                      activeItem === item
+                        ? "2px solid #4CAF0A"
                         : "2px solid transparent",
                     borderRadius: 0,
                     paddingBottom: "8px",
+                    transition: "color 0.2s ease",
                     "&:hover": {
                       background: "transparent",
-                      color: "#000",
+                      color: "#4CAF0A",
                     },
                   }}
                 >
@@ -156,21 +208,14 @@ function Header() {
               sx={{
                 display: "flex",
                 alignItems: "center",
-                gap: {
-                  xs: 1,
-                  sm: 2,
-                  md: 3,
-                },
+                gap: { xs: 1, sm: 2, md: 3 },
               }}
             >
               {/* Desktop Login */}
               <Button
                 startIcon={<LoginIcon />}
                 sx={{
-                  display: {
-                    xs: "none",
-                    md: "flex",
-                  },
+                  display: { xs: "none", md: "flex" },
                   color: "#555",
                   textTransform: "none",
                   fontWeight: 600,
@@ -185,10 +230,7 @@ function Header() {
               <Button
                 variant="contained"
                 sx={{
-                  display: {
-                    xs: "none",
-                    md: "flex",
-                  },
+                  display: { xs: "none", md: "flex" },
                   backgroundColor: "#4CAF0A",
                   color: "#fff",
                   borderRadius: "10px",
@@ -214,10 +256,7 @@ function Header() {
                 edge="end"
                 onClick={handleDrawerToggle}
                 sx={{
-                  display: {
-                    xs: "flex",
-                    md: "none",
-                  },
+                  display: { xs: "flex", md: "none" },
                   color: "#333",
                 }}
               >
@@ -229,11 +268,7 @@ function Header() {
       </AppBar>
 
       {/* MOBILE DRAWER */}
-      <Drawer
-        anchor="right"
-        open={mobileOpen}
-        onClose={handleDrawerToggle}
-      >
+      <Drawer anchor="right" open={mobileOpen} onClose={handleDrawerToggle}>
         {drawer}
       </Drawer>
     </>
