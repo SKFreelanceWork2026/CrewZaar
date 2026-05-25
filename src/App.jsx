@@ -1,9 +1,18 @@
+import Header from "./modules/website/components/Header";
+import Footer from "./modules/website/components/Footer";
+
 function App() {
   return (
-    <div className="text-3xl font-bold text-center mt-10">
-      Crewzaar Frontend Started 🚀
-    </div>
-  )
+    <>
+      <Header />
+
+      <div className="min-h-screen flex items-center justify-center text-3xl font-bold">
+        Crewzaar Frontend Started 🚀
+      </div>
+
+      <Footer />
+    </>
+  );
 }
 
-export default App
+export default App;
