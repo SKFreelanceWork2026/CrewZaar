@@ -24,32 +24,17 @@ const Footer = () => {
     <Box
       sx={{
         backgroundColor: "#000",
+        backgroundImage: `url(${footerbg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
         color: "#fff",
         position: "relative",
         overflow: "hidden",
-        pt: { xs: 5, md: 6 },
+        pt: { xs: 3, md: 4 },
         pb: 4,
       }}
     >
-      {/* BACKGROUND EFFECT */}
-<Box
-  sx={{
-    backgroundColor: "#000",
-
-    // ADD THIS
-    backgroundImage: `url(${footerbg})`,
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat",
-
-    color: "#fff",
-    position: "relative",
-    overflow: "hidden",
-    pt: { xs: 5, md: 6 },
-    pb: 4,
-  }}
-></Box>
-
       <Container maxWidth="lg" sx={{ position: "relative", zIndex: 2 }}>
         {/* TOP SECTION */}
         <Grid
@@ -286,7 +271,7 @@ const Footer = () => {
           }}
         />
 
-        {/* CONTACT INFO — left / center / right on desktop, stacked on mobile */}
+        {/* CONTACT INFO */}
         <Box
           sx={{
             display: "flex",
@@ -296,14 +281,8 @@ const Footer = () => {
             gap: { xs: 3, md: 0 },
           }}
         >
-          {/* EMAIL — left */}
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1.5,
-            }}
-          >
+          {/* EMAIL */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
             <EmailOutlinedIcon sx={{ color: "#4CAF0A", fontSize: 22 }} />
             <Box>
               <Typography sx={{ fontWeight: 600, fontSize: "14px" }}>
@@ -315,14 +294,8 @@ const Footer = () => {
             </Box>
           </Box>
 
-          {/* PHONE — center */}
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1.5,
-            }}
-          >
+          {/* PHONE */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
             <PhoneOutlinedIcon sx={{ color: "#4CAF0A", fontSize: 22 }} />
             <Box>
               <Typography sx={{ fontWeight: 600, fontSize: "14px" }}>
@@ -334,14 +307,8 @@ const Footer = () => {
             </Box>
           </Box>
 
-          {/* LOCATION — right */}
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1.5,
-            }}
-          >
+          {/* LOCATION */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
             <LocationOnOutlinedIcon sx={{ color: "#4CAF0A", fontSize: 22 }} />
             <Box>
               <Typography sx={{ fontWeight: 600, fontSize: "14px" }}>
