@@ -3,7 +3,7 @@ import { useState } from "react";
 const testimonials = [
   {
     quote:
-      "Crewzaar helped us hire 3 verified developers within days. The quality of candidates was outstanding and saved us weeks of screening.",
+      "Crewzaar helped us hggg hire 3 verified developers within days. The quality of candidates was outstanding and saved us weeks of screening.",
     name: "Alex Johnson",
     title: "Founder, TechStart Inc.",
     avatar: "https://randomuser.me/api/portraits/men/32.jpg",
@@ -28,14 +28,20 @@ const testimonials = [
 ];
 
 const StarRating = ({ count }) => (
-  <div style={{ display: "flex", gap: "4px", marginTop: "12px" }}>
+  <div
+    style={{
+      display: "flex",
+      gap: "4px",
+      marginTop: "18px",
+    }}
+  >
     {Array.from({ length: count }).map((_, i) => (
       <svg
         key={i}
         width="18"
         height="18"
         viewBox="0 0 20 20"
-        fill="#FFD700"
+        fill="#ffffff"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path d="M10 15.27L16.18 19l-1.64-7.03L20 7.24l-7.19-.61L10 0 7.19 6.63 0 7.24l5.46 4.73L3.82 19z" />
@@ -47,87 +53,131 @@ const StarRating = ({ count }) => (
 const SuccessStories = () => {
   const [current, setCurrent] = useState(0);
 
-  const goTo = (index) => setCurrent(index);
-
-  const { quote, name, title, avatar, rating } = testimonials[current];
+  const { quote, name, title, avatar, rating } =
+    testimonials[current];
 
   return (
     <section
       style={{
-        backgroundColor: "#3aaa35",
-        padding: "72px 24px",
+        background: "#41AA00",
+        padding: "90px 24px 60px",
         textAlign: "center",
+        overflow: "hidden",
       }}
     >
       {/* Heading */}
       <h2
         style={{
-          color: "#ffffff",
-          fontSize: "clamp(22px, 4vw, 32px)",
-          fontWeight: "800",
-          letterSpacing: "1.5px",
+          color: "#fff",
+          fontSize: "clamp(34px,5vw,58px)",
+          fontWeight: 900,
           textTransform: "uppercase",
-          marginBottom: "8px",
+          margin: 0,
+          letterSpacing: "-1px",
         }}
       >
-        Success Stories
+        SUCCESS STORIES
       </h2>
-      <p style={{ color: "rgba(255,255,255,0.75)", fontSize: "14px", marginBottom: "40px" }}>
+
+      <p
+        style={{
+          color: "rgba(255,255,255,0.9)",
+          fontSize: "15px",
+          marginTop: "18px",
+          marginBottom: "70px",
+        }}
+      >
         Real Hiring Success From Companies Using Crewzaar.
       </p>
 
-      {/* Card */}
+      {/* CARD */}
       <div
         style={{
-          maxWidth: "520px",
+          maxWidth: "820px",
           margin: "0 auto",
-          backgroundColor: "rgba(255,255,255,0.12)",
-          backdropFilter: "blur(12px)",
-          border: "1px solid rgba(255,255,255,0.2)",
-          borderRadius: "16px",
-          padding: "36px 32px 28px",
+          background: "rgba(255,255,255,0.10)",
+          border: "1px solid rgba(255,255,255,0.14)",
+          borderRadius: "28px",
+          padding: "52px 48px",
+          backdropFilter: "blur(8px)",
           textAlign: "left",
-          transition: "all 0.3s ease",
         }}
       >
-        {/* Quote icon */}
-        <div style={{ marginBottom: "16px" }}>
-          <svg width="32" height="24" viewBox="0 0 32 24" fill="rgba(255,255,255,0.5)">
-            <path d="M0 24V14.4C0 6.432 4.768 1.376 14.304 0L15.68 2.784C11.2 3.712 8.832 6.272 8.288 10.464H14.4V24H0Zm17.6 0V14.4C17.6 6.432 22.368 1.376 31.904 0L33.28 2.784C28.8 3.712 26.432 6.272 25.888 10.464H32V24H17.6Z" />
+        {/* QUOTE ICON */}
+        <div
+          style={{
+            marginBottom: "34px",
+          }}
+        >
+          <svg
+            width="54"
+            height="54"
+            viewBox="0 0 32 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M0 24V14.4C0 6.432 4.768 1.376 14.304 0L15.68 2.784C11.2 3.712 8.832 6.272 8.288 10.464H14.4V24H0Zm17.6 0V14.4C17.6 6.432 22.368 1.376 31.904 0L33.28 2.784C28.8 3.712 26.432 6.272 25.888 10.464H32V24H17.6Z"
+              stroke="rgba(255,255,255,0.35)"
+              strokeWidth="2"
+            />
           </svg>
         </div>
 
-        {/* Quote text */}
+        {/* QUOTE */}
         <p
           style={{
-            color: "#ffffff",
-            fontSize: "15px",
-            lineHeight: "1.7",
-            marginBottom: "24px",
-            fontStyle: "italic",
+            color: "#fff",
+            fontSize: "22px",
+            lineHeight: "1.9",
+            margin: 0,
+            maxWidth: "680px",
+            fontWeight: 400,
           }}
         >
-          "{quote}"
+          “{quote}”
         </p>
 
-        {/* Author */}
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        {/* USER */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "16px",
+            marginTop: "42px",
+          }}
+        >
           <img
             src={avatar}
             alt={name}
             style={{
-              width: "44px",
-              height: "44px",
+              width: "62px",
+              height: "62px",
               borderRadius: "50%",
               objectFit: "cover",
               border: "2px solid rgba(255,255,255,0.4)",
             }}
           />
+
           <div>
-            <p style={{ color: "#ffffff", fontWeight: "700", fontSize: "14px", margin: 0 }}>
+            <h4
+              style={{
+                color: "#fff",
+                margin: 0,
+                fontSize: "18px",
+                fontWeight: 700,
+              }}
+            >
               {name}
-            </p>
-            <p style={{ color: "rgba(255,255,255,0.65)", fontSize: "12px", margin: 0 }}>
+            </h4>
+
+            <p
+              style={{
+                color: "rgba(255,255,255,0.8)",
+                margin: "6px 0 0 0",
+                fontSize: "15px",
+              }}
+            >
               {title}
             </p>
           </div>
@@ -136,21 +186,30 @@ const SuccessStories = () => {
         <StarRating count={rating} />
       </div>
 
-      {/* Dots */}
-      <div style={{ display: "flex", justifyContent: "center", gap: "8px", marginTop: "28px" }}>
+      {/* DOTS */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          gap: "10px",
+          marginTop: "34px",
+        }}
+      >
         {testimonials.map((_, i) => (
           <button
             key={i}
-            onClick={() => goTo(i)}
+            onClick={() => setCurrent(i)}
             style={{
-              width: i === current ? "24px" : "10px",
-              height: "10px",
-              borderRadius: "5px",
+              width: i === current ? "34px" : "12px",
+              height: "12px",
+              borderRadius: "30px",
               border: "none",
-              backgroundColor: i === current ? "#ffffff" : "rgba(255,255,255,0.4)",
+              background:
+                i === current
+                  ? "#fff"
+                  : "rgba(255,255,255,0.35)",
+              transition: "0.3s",
               cursor: "pointer",
-              transition: "all 0.3s ease",
-              padding: 0,
             }}
           />
         ))}

@@ -13,23 +13,34 @@ const Home = () => {
       {/* HEADER */}
       <Header />
 
-      {/* HERO SECTION */}
-      <HeroSection />
+      {/* ALL SECTIONS SCALE */}
+      <div
+        style={{
+          transform: "scale(0.93)",
+          transformOrigin: "top center",
+          width: "107.5%",
+          marginLeft: "-3.75%",
+          overflowX: "hidden",
+        }}
+      >
+        {/* HERO SECTION */}
+        <HeroSection />
 
-      {/* TALENT SECTION */}
-      <TalentSection />
+        {/* TALENT SECTION */}
+        <TalentSection />
 
-      {/* SUCCESS STORIES */}
-      {/* <SuccessStories /> */}
+        {/* SUCCESS STORIES */}
+        <SuccessStories />
 
-      {/* PRICING SECTION */}
-      <PricingSection />
+        {/* PRICING SECTION */}
+        <PricingSection />
 
-      {/* CTA SECTION */}
-      <CTASection />
+        {/* CTA SECTION */}
+        <CTASection />
 
-      {/* BLOG SECTION */}
-      <BlogSection />
+        {/* BLOG SECTION */}
+        <BlogSection />
+      </div>
 
       {/* FOOTER */}
       <Footer />
