@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import {
   Box,
@@ -11,8 +11,63 @@ import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import Groups2RoundedIcon from "@mui/icons-material/Groups2Rounded";
 
 const TalentSection = () => {
+  const [count, setCount] = useState(0);
+
+  const sectionRef = useRef(null);
+
+  const started = useRef(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (
+          entry.isIntersecting &&
+          !started.current
+        ) {
+          started.current = true;
+
+          let start = 0;
+
+          const end = 2000;
+
+          const duration = 2000;
+
+          const incrementTime = 10;
+
+          const step =
+            end / (duration / incrementTime);
+
+          const timer = setInterval(() => {
+            start += step;
+
+            if (start >= end) {
+              start = end;
+              clearInterval(timer);
+            }
+
+            setCount(Math.floor(start));
+          }, incrementTime);
+        }
+      },
+      {
+        threshold: 0.4,
+      }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => {
+      if (sectionRef.current) {
+        observer.unobserve(sectionRef.current);
+      }
+    };
+  }, []);
+
   return (
     <Box
+      ref={sectionRef}
       sx={{
         backgroundColor: "#41AA00",
 
@@ -282,7 +337,7 @@ const TalentSection = () => {
                       mb: 0.5,
                     }}
                   >
-                    2000+
+                    {count}+
                   </Typography>
 
                   <Typography

@@ -7,40 +7,61 @@ import CTASection from "../components/CTASection";
 import BlogSection from "../components/BlogSection";
 import Footer from "../components/Footer";
 
+// New sections
+import TrustedCompanies from "../components/TrustedCompanies";
+import HowItWorksVideo from "../components/HowItWorksVideo";
+import OpportunitiesSection from "../components/OpportunitiesSection";
+import OurServices from "../components/OurServices";
+import WhyCrewzaar from "../components/WhyCrewzaar";
+import HowCrewzaarWorks from "../components/HowCrewzaarWorks";
+
 const Home = () => {
   return (
     <>
       {/* HEADER */}
       <Header />
 
-      {/* ALL SECTIONS SCALE */}
-      <div
-        style={{
-          transform: "scale(0.93)",
-          transformOrigin: "top center",
-          width: "107.5%",
-          marginLeft: "-3.75%",
-          overflowX: "hidden",
-        }}
-      >
-        {/* HERO SECTION */}
-        <HeroSection />
+      {/* HERO SECTION */}
+      <HeroSection />
 
-        {/* TALENT SECTION */}
-        <TalentSection />
+      {/* TALENT SECTION */}
+      <TalentSection />
 
-        {/* SUCCESS STORIES */}
-        <SuccessStories />
 
-        {/* PRICING SECTION */}
-        <PricingSection />
+      {/* HOW CREWZAAR WORKS */}
+      <HowCrewzaarWorks />
 
-        {/* CTA SECTION */}
-        <CTASection />
 
-        {/* BLOG SECTION */}
-        <BlogSection />
-      </div>
+
+      {/* WHY CREWZAAR */}
+      <WhyCrewzaar />
+
+
+      {/* OUR SERVICES */}
+      <OurServices />
+
+      {/* NO JOB SEARCHING – ONLY OPPORTUNITIES + STATS */}
+      <OpportunitiesSection />
+
+      {/* SEE HOW CREWZAAR WORKS - VIDEO SECTION */}
+      <HowItWorksVideo />
+
+
+      {/* TRUSTED BY GROWING COMPANIES */}
+      <TrustedCompanies />
+
+
+      {/* SUCCESS STORIES */}
+      <SuccessStories />
+
+      {/* PRICING SECTION */}
+      <PricingSection />
+
+      {/* CTA SECTION */}
+      <CTASection />
+
+      {/* BLOG SECTION */}
+      <BlogSection />
 
       {/* FOOTER */}
       <Footer />
