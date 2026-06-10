@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Logo from "../../../assets/images/logo1.png";
+import SummaryApi from "../../../common";
 
 const styles = {
   page: {
@@ -52,7 +53,6 @@ const styles = {
     boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
     border: "0.5px solid #e0e0e0",
     cursor: "pointer",
-    transition: "box-shadow 0.15s, transform 0.15s",
   },
   iconWrap: {
     width: "58px",
@@ -63,13 +63,11 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     marginBottom: "1.1rem",
-    flexShrink: 0,
   },
   cardTitle: {
     fontSize: "17px",
     fontWeight: 800,
     color: "#1a1a1a",
-    letterSpacing: "0.5px",
     marginBottom: "0.4rem",
   },
   cardDesc: {
@@ -99,8 +97,6 @@ const styles = {
     height: "8px",
     borderRadius: "50%",
     background: "#4CAF0A",
-    flexShrink: 0,
-    display: "inline-block",
   },
   btn: {
     width: "100%",
@@ -109,15 +105,9 @@ const styles = {
     color: "#fff",
     fontSize: "14px",
     fontWeight: 700,
-    letterSpacing: "1.5px",
-    textTransform: "uppercase",
     border: "none",
     borderRadius: "8px",
     cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: "8px",
     marginTop: "auto",
   },
   backBtn: {
@@ -127,7 +117,6 @@ const styles = {
     background: "none",
     border: "none",
     cursor: "pointer",
-    padding: "4px 8px",
   },
 };
 
@@ -140,13 +129,9 @@ const UsersIcon = () => (
     fill="none"
     stroke="#fff"
     strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
   >
     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
     <circle cx="9" cy="7" r="4" />
-    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
   </svg>
 );
 
@@ -159,15 +144,15 @@ const BriefcaseIcon = () => (
     fill="none"
     stroke="#fff"
     strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
   >
-    <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+    <rect x="2" y="7" width="20" height="14" rx="2" />
     <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />
-    <line x1="12" y1="12" x2="12" y2="16" />
-    <line x1="10" y1="14" x2="14" y2="14" />
   </svg>
 );
+
+const memberType = JSON.parse(localStorage.getItem("memberType"));
+
+console.log(memberType);
 
 const Card = ({
   icon,
@@ -177,67 +162,95 @@ const Card = ({
   onClick,
   buttonDisabled = false,
 }) => {
-  const [hovered, setHovered] = React.useState(false);
-  const [btnHovered, setBtnHovered] = React.useState(false);
-
   return (
-    <div
-      style={{
-        ...styles.card,
-        boxShadow: hovered
-          ? "0 6px 24px rgba(0,0,0,0.1)"
-          : styles.card.boxShadow,
-        transform: hovered ? "translateY(-2px)" : "none",
-      }}
-      onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
+    <div style={styles.card}>
       <div style={styles.iconWrap}>{icon}</div>
+
       <div style={styles.cardTitle}>{title}</div>
+
       <p style={styles.cardDesc}>{description}</p>
+
       <ul style={styles.features}>
-        {features.map((f, i) => (
-          <li key={i} style={styles.featureItem}>
-            <span style={styles.dot} />
-            {f}
+        {features.map((feature, index) => (
+          <li key={index} style={styles.featureItem}>
+            <span style={styles.dot}></span>
+            {feature}
           </li>
         ))}
       </ul>
-<button
-  disabled={buttonDisabled}
-  style={{
-    ...styles.btn,
-    background: btnHovered && !buttonDisabled
-      ? "#2e7d3e"
-      : "#4CAF0A",
-    cursor: buttonDisabled ? "not-allowed" : "pointer",
-    opacity: 1,
-  }}
-  onClick={(e) => {
-    e.stopPropagation();
-    if (!buttonDisabled) {
-      onClick?.();
-    }
-  }}
-  onMouseEnter={() => !buttonDisabled && setBtnHovered(true)}
-  onMouseLeave={() => setBtnHovered(false)}
->
-  GET STARTED &nbsp;→
-</button>
+
+      <button
+        disabled={buttonDisabled}
+        style={{
+          ...styles.btn,
+          opacity: buttonDisabled ? 0.6 : 1,
+          cursor: buttonDisabled ? "not-allowed" : "pointer",
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (!buttonDisabled) {
+            onClick();
+          }
+        }}
+      >
+        GET STARTED →
+      </button>
     </div>
   );
 };
 
 const ChooseRole = ({ onSelectRole }) => {
   const navigate = useNavigate();
+
+const fetchMemberTypes = async () => {
+  try {
+    const response = await fetch(SummaryApi.ChooseRole.url, {
+      method: SummaryApi.ChooseRole.method,
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      const employeeType = result.data.find(
+        (item) => item.member_type_name === "Employee"
+      );
+
+      if (employeeType) {
+        localStorage.setItem(
+          "memberType",
+          JSON.stringify({
+            member_type_id: employeeType.member_type_id,
+            member_type_name: employeeType.member_type_name,
+          })
+        );
+
+        console.log(
+          "Stored:",
+          JSON.parse(localStorage.getItem("memberType"))
+        );
+
+        onSelectRole?.();
+      }
+    }
+  } catch (error) {
+    console.error("Failed to fetch member types:", error);
+  }
+};
+
   return (
     <div style={styles.page}>
       <div style={styles.logoWrap}>
-        <img src={Logo} alt="Crewzaar" style={styles.logoImg} />
+        <img
+          src={Logo}
+          alt="Crewzaar"
+          style={styles.logoImg}
+        />
       </div>
 
-      <h1 style={styles.pageTitle}>CHOOSE YOUR ROLE</h1>
+      <h1 style={styles.pageTitle}>
+        CHOOSE YOUR ROLE
+      </h1>
+
       <p style={styles.pageSubtitle}>
         Select how you want to participate in the V-Hub ecosystem
       </p>
@@ -267,11 +280,14 @@ const ChooseRole = ({ onSelectRole }) => {
             "Wait for opportunities",
             "Build reputation",
           ]}
-          onClick={() => onSelectRole?.()}
+          onClick={fetchMemberTypes}
         />
       </div>
 
-      <button style={styles.backBtn} onClick={() => navigate("/")}>
+      <button
+        style={styles.backBtn}
+        onClick={() => navigate("/")}
+      >
         ← Back to Home
       </button>
     </div>
