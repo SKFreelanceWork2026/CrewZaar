@@ -100,6 +100,27 @@ getprofileimage: {
   method: "GET"
 },
 
+//employee panel apis
+  EmployeeLogin: {
+    url: `${backendDomain}/employeepanel/employeelogin.php`,
+    method: "POST",
+  },
+  VerifyOTP: {
+    url: `${backendDomain}/employeepanel/verifyotp.php`,
+    method: "POST",
+  },
+  ResendOTP: {
+    url: `${backendDomain}/employeepanel/resendotp.php`,
+    method: "POST",
+  },
+
+
+
+
+
+
+
+
 }
 
 export default SummaryApi;

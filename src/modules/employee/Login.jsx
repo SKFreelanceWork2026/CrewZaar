@@ -1,4 +1,4 @@
-// Login.jsx (updated)
+// Login.jsx (updated with OTP verification flow)
 import React, { useState, useEffect, useRef } from "react";
 import {
   Close as CloseIcon,
@@ -7,7 +7,6 @@ import {
   Phone as PhoneIcon,
   Lock as LockIcon,
   CheckCircle as CheckCircleIcon,
-  Email as EmailIcon,
   Visibility as VisibilityIcon,
   VisibilityOff as VisibilityOffIcon,
 } from "@mui/icons-material";
@@ -26,6 +25,7 @@ import {
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
+import SummaryApi from "../../common/index";
 
 // ── Styled Components ────────────────────────────────────
 const ModalWrapper = styled(Box)(({ theme }) => ({
@@ -227,7 +227,7 @@ const BackButton = styled(Button)({
 import logo from "../../assets/images/Changed Logo.png";
 
 // ── Toast Notification using MUI Snackbar ─────────────────
-function Toast({ message, visible, onClose }) {
+function Toast({ message, visible, onClose, severity = "error" }) {
   return (
     <Snackbar
       open={visible}
@@ -251,11 +251,10 @@ function Toast({ message, visible, onClose }) {
     >
       <Alert
         onClose={onClose}
-        severity="success"
-        icon={<EmailIcon sx={{ fontSize: 20 }} />}
+        severity={severity}
         sx={{
           width: "100%",
-          backgroundColor: "#1a4d00",
+          backgroundColor: severity === "success" ? "#1a4d00" : "#d32f2f",
           color: "#fff",
           borderRadius: 12,
           fontWeight: 600,
@@ -328,7 +327,7 @@ function TimerRing({ seconds, total }) {
 }
 
 // ── OTP Step ──────────────────────────────────────────────
-function StepOTP({ mobile, onVerify, onBack, onResend }) {
+function StepOTP({ mobile, onVerify, onBack, onResend, isLoading }) {
   const OTP_TOTAL = 30;
   const [digits, setDigits] = useState(["", "", "", ""]);
   const [seconds, setSeconds] = useState(OTP_TOTAL);
@@ -494,12 +493,12 @@ function StepOTP({ mobile, onVerify, onBack, onResend }) {
         fullWidth
         variant="contained"
         onClick={handleVerify}
-        disabled={!allFilled}
+        disabled={!allFilled || isLoading}
         sx={{
-          background: allFilled ? "#4CAF0A" : "#c8e6b0",
+          background: allFilled && !isLoading ? "#4CAF0A" : "#c8e6b0",
           color: "#fff",
           "&:hover": {
-            background: allFilled ? "#3d9e00" : "#c8e6b0",
+            background: allFilled && !isLoading ? "#3d9e00" : "#c8e6b0",
           },
           "&.Mui-disabled": {
             background: "#c8e6b0",
@@ -507,7 +506,7 @@ function StepOTP({ mobile, onVerify, onBack, onResend }) {
           },
         }}
       >
-        Verify & Sign In
+        {isLoading ? "Verifying..." : "Verify & Sign In"}
       </StyledButton>
     </Box>
   );
@@ -559,7 +558,7 @@ function StepSuccess({ onNavigateToDashboard }) {
 }
 
 // ── Login Form ────────────────────────────────────────────
-function LoginForm({ mobile, setMobile, mobileError, loginCode, setLoginCode, onSendOTP }) {
+function LoginForm({ mobile, setMobile, mobileError, loginCode, setLoginCode, onSendOTP, isLoading }) {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
@@ -679,14 +678,18 @@ function LoginForm({ mobile, setMobile, mobileError, loginCode, setLoginCode, on
         fullWidth
         variant="contained"
         onClick={onSendOTP}
+        disabled={isLoading}
         sx={{
           background: "#4CAF0A",
           "&:hover": {
             background: "#3d9e00",
           },
+          "&.Mui-disabled": {
+            background: "#c8e6b0",
+          },
         }}
       >
-        Sign In to Dashboard
+        {isLoading ? "Sending OTP..." : "Sign In to Dashboard"}
       </StyledButton>
     </Box>
   );
@@ -699,16 +702,18 @@ export default function LoginModal({ open = true, onClose = () => {}, onLoginSuc
   const [mobile, setMobile] = useState("");
   const [loginCode, setLoginCode] = useState("");
   const [mobileError, setMobileError] = useState(false);
-  const [toast, setToast] = useState({ visible: false, message: "" });
+  const [toast, setToast] = useState({ visible: false, message: "", severity: "success" });
+  const [isLoading, setIsLoading] = useState(false);
+  const [employeeData, setEmployeeData] = useState(null);
 
   if (open === false) return null;
 
-  function showToast(msg) {
-    setToast({ visible: true, message: msg });
+  function showToast(msg, severity = "error") {
+    setToast({ visible: true, message: msg, severity });
   }
 
   const handleToastClose = () => {
-    setToast({ visible: false, message: "" });
+    setToast({ visible: false, message: "", severity: "success" });
   };
 
   const handleClose = () => {
@@ -718,40 +723,182 @@ export default function LoginModal({ open = true, onClose = () => {}, onLoginSuc
       setMobile("");
       setLoginCode("");
       setMobileError(false);
+      setEmployeeData(null);
     }, 250);
   };
 
-  const handleSendOTP = () => {
-    if (!mobile.trim() || mobile.trim().length < 8) {
+  // ── handleSendOTP - Check mobile and send OTP ──
+  const handleSendOTP = async () => {
+    if (!mobile.trim() || mobile.trim().length < 10) {
       setMobileError(true);
+      showToast("Please enter a valid 10-digit mobile number", "error");
       return;
     }
     setMobileError(false);
-    setStep("otp");
-    setTimeout(() => showToast(`OTP sent to +91 ${mobile.slice(0, 2)}****${mobile.slice(-4)}`), 300);
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(SummaryApi.EmployeeLogin.url, {
+        method: SummaryApi.EmployeeLogin.method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phone: mobile,
+          password: loginCode || "",
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Store mobile for OTP verification
+        sessionStorage.setItem("login_phone", mobile);
+        sessionStorage.setItem("login_member_id", data.data.member_id);
+        
+        // Store employee basic data
+        setEmployeeData(data.data);
+        
+        // For testing - log OTP (remove in production)
+        if (data.data.otp) {
+          console.log("OTP for testing:", data.data.otp);
+        }
+
+        showToast(`OTP sent to +91 ${mobile.slice(0, 2)}****${mobile.slice(-4)}`, "success");
+        setStep("otp");
+      } else {
+        showToast(data.message || "Mobile number not found. Please check and try again.", "error");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      showToast("Server Error. Please try again later.", "error");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleResend = () => {
-    showToast(`OTP resent to +91 ${mobile.slice(0, 2)}****${mobile.slice(-4)}`);
+  // ── handleVerifyOTP - Verify OTP and complete login ──
+  const handleVerifyOTP = async (otpCode) => {
+    setIsLoading(true);
+
+    try {
+      const phone = sessionStorage.getItem("login_phone");
+      
+      if (!phone) {
+        showToast("Session expired. Please try again.", "error");
+        setStep("form");
+        return;
+      }
+
+      const response = await fetch(SummaryApi.VerifyOTP.url, {
+        method: SummaryApi.VerifyOTP.method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phone: phone,
+          otp: otpCode,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Store complete employee data
+        const employee = data.data;
+        
+        // Store all employee data in sessionStorage
+        sessionStorage.setItem("member_id", employee.member_id || "");
+        sessionStorage.setItem("member_type_id", employee.member_type_id || "");
+        sessionStorage.setItem("employee_id", employee.employee_id || "");
+        sessionStorage.setItem("full_name", employee.full_name || "");
+        sessionStorage.setItem("role", employee.role || "");
+        sessionStorage.setItem("email", employee.email || "");
+        sessionStorage.setItem("phone", employee.phone || "");
+        sessionStorage.setItem("username", employee.username || "");
+        sessionStorage.setItem("skills", employee.skills || "");
+        sessionStorage.setItem("notice_period", employee.notice_period || "");
+        sessionStorage.setItem("preferred_work_mode", employee.preferred_work_mode || "");
+        sessionStorage.setItem("profile_image", employee.profile_image || "");
+        sessionStorage.setItem("document_verified", employee.document_verified || 0);
+        sessionStorage.setItem("profile_verified", employee.profile_verified || 0);
+        sessionStorage.setItem("employee", JSON.stringify(employee));
+        sessionStorage.setItem("isAuthenticated", "true");
+        
+        // Clear login temp data
+        sessionStorage.removeItem("login_phone");
+        sessionStorage.removeItem("login_member_id");
+
+        showToast(`Welcome ${employee.full_name || "Employee"}!`, "success");
+        setStep("success");
+      } else {
+        showToast(data.message || "Invalid OTP. Please try again.", "error");
+      }
+    } catch (error) {
+      console.error("OTP verification error:", error);
+      showToast("Server Error. Please try again.", "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ── handleResendOTP - Resend OTP ──
+  const handleResendOTP = async () => {
+    setIsLoading(true);
+
+    try {
+      const phone = sessionStorage.getItem("login_phone");
+      
+      if (!phone) {
+        showToast("Session expired. Please try again.", "error");
+        setStep("form");
+        return;
+      }
+
+      const response = await fetch(SummaryApi.ResendOTP.url, {
+        method: SummaryApi.ResendOTP.method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phone: phone,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // For testing - log OTP (remove in production)
+        if (data.data?.otp) {
+          console.log("New OTP:", data.data.otp);
+        }
+        showToast(`OTP resent to +91 ${phone.slice(0, 2)}****${phone.slice(-4)}`, "success");
+      } else {
+        showToast(data.message || "Failed to resend OTP. Please try again.", "error");
+      }
+    } catch (error) {
+      console.error("Resend OTP error:", error);
+      showToast("Server Error. Please try again.", "error");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleNavigateToDashboard = () => {
-    handleClose();
     if (onLoginSuccess) onLoginSuccess();
-    // Navigate to dashboard
-    navigate("/dashboard");
-  };
 
-  const handleVerify = () => {
-    setStep("success");
+    navigate("/employee-panel/dashboard", {
+      replace: true,
+    });
   };
 
   return (
     <>
-      <Toast 
-        message={toast.message} 
-        visible={toast.visible} 
+      <Toast
+        message={toast.message}
+        visible={toast.visible}
         onClose={handleToastClose}
+        severity={toast.severity}
       />
       <ModalWrapper>
         <ModalCard elevation={0}>
@@ -781,9 +928,10 @@ export default function LoginModal({ open = true, onClose = () => {}, onLoginSuc
             {step === "otp" && (
               <StepOTP
                 mobile={mobile}
-                onVerify={handleVerify}
+                onVerify={handleVerifyOTP}
                 onBack={() => setStep("form")}
-                onResend={handleResend}
+                onResend={handleResendOTP}
+                isLoading={isLoading}
               />
             )}
             {step === "form" && (
@@ -794,6 +942,7 @@ export default function LoginModal({ open = true, onClose = () => {}, onLoginSuc
                 loginCode={loginCode}
                 setLoginCode={setLoginCode}
                 onSendOTP={handleSendOTP}
+                isLoading={isLoading}
               />
             )}
           </ModalBody>

@@ -1,35 +1,38 @@
 // EmployeeRoutes.jsx
 import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./Login";
-import Dashboard from "./Dashboard";
+import Layout from "./components/Layout";
+import Dashboard from "../employee/Dashboard";
 
 const EmployeeRoutes = () => {
-  // You can add authentication check here
-  const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
+  const isAuthenticated =
+    sessionStorage.getItem("isAuthenticated") === "true";
 
   return (
     <Routes>
+      {/* Login - Always accessible */}
       <Route path="/" element={<Login />} />
-      <Route path="login" element={<Login />} />
-      <Route 
-        path="dashboard" 
-        element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} 
-      />
-      <Route 
-        path="employees" 
-        element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} 
-      />
-      <Route 
-        path="jobs" 
-        element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} 
-      />
-      <Route 
-        path="assignments" 
-        element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} 
-      />
-      <Route 
-        path="settings" 
-        element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} 
+      <Route path="/login" element={<Login />} />
+
+      {/* Protected Routes - Check authentication at route level */}
+      <Route
+        element={
+          isAuthenticated ? (
+            <Layout />
+          ) : (
+            <Navigate to="/employee-panel/login" replace />
+          )
+        }
+      >
+        <Route path="/dashboard" element={<Dashboard />} />
+   
+        {/* Add other protected routes here */}
+      </Route>
+
+      {/* Catch all - Redirect to login */}
+      <Route
+        path="*"
+        element={<Navigate to="/employee-panel/login" replace />}
       />
     </Routes>
   );

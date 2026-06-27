@@ -406,14 +406,14 @@ const isFresher = (expValue) => expValue === "fresher";
 
 const readStoredEmployeeId = () => {
   try {
-    const raw = localStorage.getItem("user");
+    const raw = sessionStorage.getItem("user");
     if (raw) {
       const parsed = JSON.parse(raw);
       if (isValidId(parsed?.employee_id)) return String(parsed.employee_id);
     }
   } catch (e) {}
   try {
-    const id = localStorage.getItem("employee_id");
+    const id = sessionStorage.getItem("employee_id");
     if (isValidId(id)) return id;
   } catch (e) {}
   return null;
@@ -421,27 +421,27 @@ const readStoredEmployeeId = () => {
 
 const persistEmployeeId = (id) => {
   try {
-    const raw = localStorage.getItem("user");
+    const raw = sessionStorage.getItem("user");
     const userObj = raw ? JSON.parse(raw) : {};
     userObj.employee_id = id;
-    localStorage.setItem("user", JSON.stringify(userObj));
+    sessionStorage.setItem("user", JSON.stringify(userObj));
   } catch (e) {}
   try {
-    localStorage.setItem("employee_id", String(id));
+    sessionStorage.setItem("employee_id", String(id));
   } catch (e) {}
 };
 
 const clearStoredEmployeeId = () => {
   try {
-    const raw = localStorage.getItem("user");
+    const raw = sessionStorage.getItem("user");
     if (raw) {
       const userObj = JSON.parse(raw);
       delete userObj.employee_id;
-      localStorage.setItem("user", JSON.stringify(userObj));
+      sessionStorage.setItem("user", JSON.stringify(userObj));
     }
   } catch (e) {}
   try {
-    localStorage.removeItem("employee_id");
+    sessionStorage.removeItem("employee_id");
   } catch (e) {}
 };
 
@@ -538,18 +538,18 @@ export default function JobProfileDashboard() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [profileImage, setProfileImage] = useState(() => {
     try {
-      return localStorage.getItem("profile_image") || null;
+      return sessionStorage.getItem("profile_image") || null;
     } catch {
       return null;
     }
   });
   const [verificationId, setVerificationId] = useState(() => {
-    return localStorage.getItem("verification_id") || null;
+    return sessionStorage.getItem("verification_id") || null;
   });
   // Which post-verification screen to show in place of the dashboard:
   // null | "taskupload" | "verification"
   const [postVerificationScreen, setPostVerificationScreen] = useState(() => {
-    return localStorage.getItem("verification_screen") || null;
+    return sessionStorage.getItem("verification_screen") || null;
   });
 
   // Skills autocomplete state
@@ -714,7 +714,7 @@ export default function JobProfileDashboard() {
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem("memberType");
+      const raw = sessionStorage.getItem("memberType");
       if (raw) {
         const parsed = JSON.parse(raw);
         setMemberTypeId(parsed.member_type_id);
@@ -723,8 +723,8 @@ export default function JobProfileDashboard() {
       }
     } catch (e) {}
     try {
-      const id = localStorage.getItem("member_type_id");
-      const name = localStorage.getItem("member_type_name");
+      const id = sessionStorage.getItem("member_type_id");
+      const name = sessionStorage.getItem("member_type_name");
       if (id) {
         setMemberTypeId(Number(id));
         setMemberTypeName(name || "");
@@ -732,7 +732,7 @@ export default function JobProfileDashboard() {
       }
     } catch (e) {}
     try {
-      const raw = localStorage.getItem("user");
+      const raw = sessionStorage.getItem("user");
       if (raw) {
         const parsed = JSON.parse(raw);
         if (parsed?.member_type_id) {
@@ -745,7 +745,7 @@ export default function JobProfileDashboard() {
       }
     } catch (e) {}
     try {
-      const mId = localStorage.getItem("member_id");
+      const mId = sessionStorage.getItem("member_id");
       if (mId) setMemberId(Number(mId));
     } catch (e) {}
   }, []);
@@ -825,7 +825,7 @@ export default function JobProfileDashboard() {
             const profileImageUrl = SummaryApi.getprofileimage.url + imageName;
             setProfileImage(profileImageUrl);
             try {
-              localStorage.setItem("profile_image", profileImageUrl);
+              sessionStorage.setItem("profile_image", profileImageUrl);
             } catch {}
           }
         } else {
@@ -845,12 +845,12 @@ export default function JobProfileDashboard() {
 
   useEffect(() => {
     const handleStorageChange = () => {
-      const screen = localStorage.getItem("verification_screen");
-      const vId = localStorage.getItem("verification_id");
+      const screen = sessionStorage.getItem("verification_screen");
+      const vId = sessionStorage.getItem("verification_id");
 
       if (vId) {
         setVerificationId(vId);
-        localStorage.removeItem("verification_screen");
+        sessionStorage.removeItem("verification_screen");
         setPostVerificationScreen(null);
         return;
       }
@@ -923,7 +923,7 @@ export default function JobProfileDashboard() {
         const profileImageUrl = SummaryApi.getprofileimage.url + imageName;
         setProfileImage(profileImageUrl);
         try {
-          localStorage.setItem("profile_image", profileImageUrl);
+          sessionStorage.setItem("profile_image", profileImageUrl);
         } catch {}
         showToast("Profile image updated successfully!");
       } else {
@@ -1234,7 +1234,7 @@ export default function JobProfileDashboard() {
             const profileImageUrl = SummaryApi.getprofileimage.url + imageName;
             setProfileImage(profileImageUrl);
             try {
-              localStorage.setItem("profile_image", profileImageUrl);
+              sessionStorage.setItem("profile_image", profileImageUrl);
             } catch {}
           }
         } catch (getErr) {
@@ -1278,7 +1278,7 @@ export default function JobProfileDashboard() {
       setExperienceId(null);
       setProfileImage(null);
       try {
-        localStorage.removeItem("profile_image");
+        sessionStorage.removeItem("profile_image");
       } catch {}
       setViewMode("form");
       setVerificationStarted(false);
@@ -1338,7 +1338,7 @@ export default function JobProfileDashboard() {
         role={savedProfile?.role || form?.role}
         employeeId={employeeId}
         onComplete={() => {
-          localStorage.removeItem("verification_screen");
+          sessionStorage.removeItem("verification_screen");
           setPostVerificationScreen(null);
         }}
       />
@@ -1351,7 +1351,7 @@ export default function JobProfileDashboard() {
         role={savedProfile?.role || form?.role}
         employeeId={employeeId}
         onComplete={() => {
-          localStorage.removeItem("verification_screen");
+          sessionStorage.removeItem("verification_screen");
           setPostVerificationScreen(null);
         }}
       />
@@ -1364,13 +1364,13 @@ export default function JobProfileDashboard() {
         role={savedProfile?.role || form?.role}
         employeeId={employeeId}
         onBack={() => {
-          localStorage.setItem("verification_screen", "taskupload");
-          localStorage.setItem("wizardStep", "2");
+          sessionStorage.setItem("verification_screen", "taskupload");
+          sessionStorage.setItem("wizardStep", "2");
           setPostVerificationScreen("taskupload");
         }}
         onNext={() => {
-          localStorage.removeItem("verification_screen");
-          localStorage.setItem("wizardStep", "5");
+          sessionStorage.removeItem("verification_screen");
+          sessionStorage.setItem("wizardStep", "5");
           window.dispatchEvent(new Event("storage"));
           setPostVerificationScreen(null);
         }}
@@ -1661,14 +1661,6 @@ export default function JobProfileDashboard() {
                 </label>
               </div>
 
-              {viewMode === "form" &&
-                !isValidId(employeeId) &&
-                !memberTypeId && (
-                  <div className="jpd-warn-banner">
-                    ⚠️ Session data missing — make sure you are logged in and
-                    member_type_id is stored correctly.
-                  </div>
-                )}
 
               {viewMode === "form" ? (
                 <>
@@ -2162,15 +2154,15 @@ export default function JobProfileDashboard() {
         // Store the role
         const roleToStore = savedProfile?.role || form?.role;
         if (roleToStore) {
-          localStorage.setItem("employee_role", roleToStore);
+          sessionStorage.setItem("employee_role", roleToStore);
         }
         
         // Set the verification screen
         const screen = isCreativeRole(roleToStore) ? "taskupload" : "verification";
-        localStorage.setItem("verification_screen", screen);
+        sessionStorage.setItem("verification_screen", screen);
         
         // Set wizard step to 2 (Verification Process)
-        localStorage.setItem("wizardStep", "2");
+        sessionStorage.setItem("wizardStep", "2");
         
         // Navigate to EmployeeWizard
         // If using React Router:
