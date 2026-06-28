@@ -380,6 +380,7 @@ const DocumentsAndInterview = ({ onBack, onNext }) => {
   const [submitError, setSubmitError] = useState("");
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [isUpdatingTask, setIsUpdatingTask] = useState(false);
   const isDesktop = useIsDesktop();
 
   const uploadDocument = async (docKey, file, useUpdateEndpoint = false) => {
@@ -429,6 +430,50 @@ const DocumentsAndInterview = ({ onBack, onNext }) => {
     return result;
   };
 
+  // ── NEW: Update pending task API call ──
+  const updatePendingTask = async () => {
+    const empId = sessionStorage.getItem("employee_id");
+
+    if (!empId) {
+      console.warn("No employee_id found");
+      return false;
+    }
+
+    try {
+      const response = await fetch(SummaryApi.createorupdatependingtasks.url, {
+        method: SummaryApi.createorupdatependingtasks.method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          employee_id: Number(empId),
+          pending_task: "complete",
+          wizard_step: 5,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Update session storage
+        sessionStorage.setItem("wizardStep", "5");
+        sessionStorage.setItem("verification_screen", "complete");
+        
+        // Dispatch events for listeners
+        window.dispatchEvent(new Event("storage"));
+        window.dispatchEvent(new Event("wizardStepChange"));
+        
+        return true;
+      } else {
+        console.error("Failed to update pending task:", result.message);
+        return false;
+      }
+    } catch (err) {
+      console.error("Error updating pending task:", err);
+      return false;
+    }
+  };
+
   const handleFileChange = async (key, e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -471,6 +516,7 @@ const DocumentsAndInterview = ({ onBack, onNext }) => {
 
   const anyUploading = Object.values(uploadStatus).some((s) => s === "uploading");
 
+  // ── UPDATED: handleSubmit with pending task update ──
   const handleSubmit = async () => {
     if (isSubmitting || anyUploading) return;
 
@@ -493,9 +539,23 @@ const DocumentsAndInterview = ({ onBack, onNext }) => {
     setIsSubmitting(true);
 
     try {
+      // Step 1: Submit interview slot
       await submitInterviewSlot();
-      setSubmitSuccess(true);
-      onNext?.({ files, selectedDate, selectedSlot, selectedLanguage });
+      
+      // Step 2: Update pending task to complete
+      const taskUpdated = await updatePendingTask();
+      
+      if (taskUpdated) {
+        setSubmitSuccess(true);
+        // Call onNext to proceed to verification complete
+        onNext?.({ files, selectedDate, selectedSlot, selectedLanguage });
+      } else {
+        // Even if task update fails, interview was scheduled
+        // Show success but log error
+        setSubmitSuccess(true);
+        console.warn("Interview scheduled but pending task update failed");
+        onNext?.({ files, selectedDate, selectedSlot, selectedLanguage });
+      }
     } catch (err) {
       setSubmitError(err?.message || "Something went wrong while scheduling your interview. Please try again.");
     } finally {
@@ -823,7 +883,14 @@ const DocumentsAndInterview = ({ onBack, onNext }) => {
                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = colors.greenDark)}
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = colors.green)}
               >
-                Yes, submit
+                {isSubmitting ? (
+                  <>
+                    <Loader2 size={16} style={styles.spin} />
+                    Submitting...
+                  </>
+                ) : (
+                  "Yes, submit"
+                )}
               </button>
             </div>
           </div>

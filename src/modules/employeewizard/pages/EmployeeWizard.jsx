@@ -7,6 +7,7 @@ import CommunicationAssessment from "../components/Communicationassessment";
 import DocumentsAndInterview from "../components/DocumentsAndInterview";
 import VerificationComplete from "../components/VerificationComplete";
 import Stepper from "../components/Stepper";
+import SummaryApi from "../../../common/index";
 
 const STORAGE_KEY = "wizardStep";
 const TASK_UPLOAD_ROLES = ["UI/UX Designer", "Graphic Designer"];
@@ -23,7 +24,51 @@ const WIZARD_STEPS = [
 const getStepperIndex = (step) => Math.max(0, step - 2);
 
 // ─── Timer state management ──────────────────────────────────────────
-const TIMER_DURATION = 1 * 60; // 2 minutes
+const TIMER_DURATION = 2 * 60; // 2 minutes
+
+// ─── API Function to save pending task ──────────────────────────────
+// In both files, update the savePendingTask function
+
+const savePendingTask = async (wizardStep, verificationScreen, status = "pending") => {
+  try {
+    const employee_id = sessionStorage.getItem("employee_id");
+    
+    if (!employee_id) {
+      console.warn("No employee_id found");
+      return;
+    }
+
+    // Simplified payload - only what the table needs
+    const payload = {
+      employee_id: employee_id,
+      wizard_step: wizardStep,
+      verification_screen: verificationScreen || "",
+      status: status,
+    };
+
+    console.log("📤 Saving pending task:", payload);
+
+    const response = await fetch(SummaryApi.createorupdatependingtasks.url, {
+      method: SummaryApi.createorupdatependingtasks.method,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.warn("⚠️ Pending task API error:", response.status, errorText);
+      return;
+    }
+
+    const result = await response.json();
+    console.log("✅ Pending task saved:", result);
+    return result;
+  } catch (err) {
+    console.error("❌ Error saving pending task:", err);
+  }
+};
 
 const EmployeeWizard = () => {
   const [step, setStep] = useState(() => {
@@ -33,7 +78,27 @@ const EmployeeWizard = () => {
   const [role, setRole] = useState(() => {
     return sessionStorage.getItem("employee_role") || "";
   });
+ useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const stepParam   = params.get("step");
+    const roleParam   = params.get("role");
+    const empIdParam  = params.get("employee_id");
+    const screenParam = params.get("verification_screen");
 
+    if (!stepParam) return; // not a resume link, skip
+
+    if (empIdParam)  sessionStorage.setItem("employee_id", empIdParam);
+    if (roleParam) {
+      sessionStorage.setItem("employee_role", roleParam);
+      sessionStorage.setItem("role", roleParam);
+    }
+    if (screenParam) sessionStorage.setItem("verification_screen", screenParam);
+    if (stepParam) {
+      sessionStorage.setItem("wizardStep", stepParam);
+      setStep(parseInt(stepParam, 10));
+      setRole(roleParam || "");
+    }
+  }, []);
   // ─── Timer State ──────────────────────────────────────────────────
   const [timeLeft, setTimeLeft] = useState(TIMER_DURATION);
   const [timerExpired, setTimerExpired] = useState(false);
@@ -96,26 +161,54 @@ const EmployeeWizard = () => {
 
   const isTaskUploadRole = TASK_UPLOAD_ROLES.includes(role);
 
-  const goToStep = (nextStep) => {
-    sessionStorage.setItem(STORAGE_KEY, String(nextStep));
-    setStep(nextStep);
-    window.dispatchEvent(new Event("storage"));
-    window.dispatchEvent(new Event("wizardStepChange"));
-  };
+  // ─── UPDATED: goToStep with API call ──────────────────────────────
+// In EmployeeWizard.jsx - Update the goToStep function
 
+const goToStep = async (nextStep) => {
+  // Determine verification_screen based on next step
+  let verificationScreen = null;
+
+  switch (nextStep) {
+    case 2:
+      verificationScreen = isTaskUploadRole ? "task" : "verification";
+      break;
+    case 3:
+      verificationScreen = "communication";
+      break;
+    case 4:
+      verificationScreen = "documents";
+      break;
+    case 5:
+      verificationScreen = "complete";
+      break;
+    default:
+      verificationScreen = ""; // Empty string instead of null for step 1
+  }
+
+  // Save to API before updating step
+  if (nextStep >= 1 && nextStep <= 5) {
+    // For step 1, pass empty string for verification_screen
+    const screen = nextStep === 1 ? "" : verificationScreen;
+    await savePendingTask(nextStep, screen);
+  }
+
+  // Update sessionStorage and state
+  sessionStorage.setItem(STORAGE_KEY, String(nextStep));
+  setStep(nextStep);
+  window.dispatchEvent(new Event("storage"));
+  window.dispatchEvent(new Event("wizardStepChange"));
+};
+
+  // ─── Screen handlers ──────────────────────────────────────────────
   const handleRoleSelect = () => goToStep(1);
   const handleProfileDone = () => goToStep(2);
   
   const handleVerificationDone = () => {
-    sessionStorage.setItem("verification_screen", "verification");
-    sessionStorage.setItem(STORAGE_KEY, "3");
-    setStep(3);
-    window.dispatchEvent(new Event("storage"));
-    window.dispatchEvent(new Event("wizardStepChange"));
+    // This now goes through goToStep which handles the API
+    goToStep(3);
   };
   
   const handleTaskUploadDone = () => {
-    sessionStorage.setItem("verification_screen", "task");
     goToStep(3);
   };
   
@@ -132,9 +225,25 @@ const EmployeeWizard = () => {
     }
   };
   
-  const handleFinish = () => {
-    sessionStorage.removeItem("verification_screen");
-    goToStep(1);
+  // ─── UPDATED: handleFinish marks wizard as complete ──────────────
+  const handleFinish = async () => {
+    try {
+      // Save completion status to API
+      await savePendingTask(5, "complete", "completed");
+      
+      // Clear session storage
+      sessionStorage.removeItem("verification_screen");
+      sessionStorage.removeItem(STORAGE_KEY);
+      
+      // Reset to step 0 (ChooseRole)
+      setStep(0);
+      window.dispatchEvent(new Event("storage"));
+      window.dispatchEvent(new Event("wizardStepChange"));
+      
+      console.log("✅ Wizard completed successfully");
+    } catch (err) {
+      console.error("❌ Error completing wizard:", err);
+    }
   };
 
   const showStepper = step >= 2;
@@ -269,4 +378,4 @@ const EmployeeWizard = () => {
   );
 };
 
-export default EmployeeWizard;
+export default EmployeeWizard; 

@@ -20,6 +20,7 @@ export default function CommunicationAssessment({ onBack, onNext, timerExpired, 
   const [hasAutoSubmitted, setHasAutoSubmitted] = useState(false);
   const [showLeaveAlert, setShowLeaveAlert] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState(null);
+  const [isUpdatingTask, setIsUpdatingTask] = useState(false);
 
   const [timeLeft, setTimeLeft] = useState(TIMER_DURATION);
   const [localTimerExpired, setLocalTimerExpired] = useState(false);
@@ -228,6 +229,60 @@ export default function CommunicationAssessment({ onBack, onNext, timerExpired, 
     fetchQuestions();
   };
 
+  // NEW: Handle Proceed with API call - Same as VerificationProcess
+  const handleProceed = async () => {
+    const employeeId = sessionStorage.getItem("employee_id");
+
+    if (!employeeId) {
+      alert("Employee ID not found. Please try again.");
+      return;
+    }
+
+    setIsUpdatingTask(true);
+
+    try {
+      const response = await fetch(SummaryApi.createorupdatependingtasks.url, {
+        method: SummaryApi.createorupdatependingtasks.method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          employee_id: Number(employeeId),
+          pending_task: "verification_complete",
+          wizard_step: 4,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Update session storage
+        sessionStorage.setItem("wizardStep", "4");
+        sessionStorage.setItem("verification_screen", "verification_complete");
+        
+        // Dispatch events for listeners
+        window.dispatchEvent(new Event("storage"));
+        window.dispatchEvent(new Event("wizardStepChange"));
+
+        // Navigate to verification complete page or dashboard
+        // Option 1: Use onNext if it navigates to the complete page
+        if (onNext) {
+          onNext();
+        } else {
+          // Option 2: Navigate directly to dashboard
+          window.location.href = "/";
+        }
+      } else {
+        alert(result.message || "Failed to update status. Please try again.");
+      }
+    } catch (err) {
+      console.error("Error updating pending task:", err);
+      alert("Unable to continue. Please check your connection.");
+    } finally {
+      setIsUpdatingTask(false);
+    }
+  };
+
   const totalAnswered = Object.keys(answers).length;
   const allAnswered = questions.length > 0 && totalAnswered === questions.length;
   const getOptions = (q) => [q.option_a, q.option_b, q.option_c, q.option_d];
@@ -368,27 +423,54 @@ export default function CommunicationAssessment({ onBack, onNext, timerExpired, 
               {submitError && <div style={styles.errorBox}>{submitError}</div>}
 
               <button
-                onClick={onNext}
+                onClick={handleProceed}
+                disabled={isUpdatingTask}
                 style={{
-                  background: "#4CAF0A",
+                  background: isUpdatingTask ? "#94a3b8" : "#4CAF0A",
                   color: "#fff",
                   border: "none",
                   borderRadius: 50,
                   padding: "14px 0",
                   fontSize: 15,
                   fontWeight: 700,
-                  cursor: "pointer",
+                  cursor: isUpdatingTask ? "not-allowed" : "pointer",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   gap: 10,
                   marginBottom: 14,
                   width: "35%",
+                  opacity: isUpdatingTask ? 0.7 : 1,
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "#3d9e08")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "#4CAF0A")}
+                onMouseEnter={(e) => {
+                  if (!isUpdatingTask) {
+                    e.currentTarget.style.background = "#3d9e08";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isUpdatingTask) {
+                    e.currentTarget.style.background = "#4CAF0A";
+                  }
+                }}
               >
-                Proceed to Complete <span style={{ fontSize: 17 }}>→</span>
+                {isUpdatingTask ? (
+                  <>
+                    <span style={{
+                      display: "inline-block",
+                      width: 16,
+                      height: 16,
+                      border: "2px solid rgba(255,255,255,0.3)",
+                      borderTop: "2px solid #fff",
+                      borderRadius: "50%",
+                      animation: "spin 0.7s linear infinite",
+                    }} />
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    Proceed to Complete <span style={{ fontSize: 17 }}>→</span>
+                  </>
+                )}
               </button>
 
               <div style={{

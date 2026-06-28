@@ -2,12 +2,333 @@ import React, { useState, useRef, useCallback, useEffect } from "react";
 import SummaryApi from "../../../common";
 import taskCompleteImg from "../../../assets/images/Nojobsearchingicons/task-complete.png";
 import taskCompleteBg from "../../../assets/images/Nojobsearchingicons/task-complete-bg.png";
+import companyLogo from "../../../assets/images/Changed Logo.png";
+
+// ── PDF Generation Library ──
+import { jsPDF } from "jspdf";
+import "jspdf-autotable";
 
 function formatBytes(bytes) {
   if (bytes < 1024) return bytes + " B";
   if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
   return (bytes / (1024 * 1024)).toFixed(1) + " MB";
 }
+
+// ── PDF Generation Function ──
+const generateTaskPDF = (task, employeeName, role) => {
+  const doc = new jsPDF('p', 'mm', 'a4');
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  
+  // ── Colors ──
+  const PRIMARY = '#4CAF0A';
+  const PRIMARY_DARK = '#2d7a06';
+  const GRAY_100 = '#f8f9fa';
+  const GRAY_200 = '#e9ecef';
+  const GRAY_700 = '#495057';
+  const GRAY_900 = '#212529';
+  const WHITE = '#ffffff';
+  const RED = '#dc3545';
+  const BLUE = '#0d6efd';
+  
+  // ── Helper: Add Watermark ──
+  const addWatermark = () => {
+    doc.setFontSize(60);
+    doc.setTextColor(200, 200, 200);
+    doc.setFont('helvetica', 'bold');
+    doc.text('CREWZAAR', pageWidth / 2, pageHeight / 2, { 
+      angle: 45, 
+      align: 'center',
+      opacity: 0.1 
+    });
+  };
+
+  // ── Header with Logo ──
+  const addHeader = () => {
+    // Header background
+    doc.setFillColor(PRIMARY);
+    doc.rect(0, 0, pageWidth, 45, 'F');
+    
+    // Logo - Left side
+    try {
+      doc.addImage(companyLogo, 'PNG', 15, 8, 30, 30);
+    } catch (e) {
+      // Fallback: Text logo if image fails
+      doc.setFontSize(22);
+      doc.setTextColor(WHITE);
+      doc.setFont('helvetica', 'bold');
+      doc.text('CREWZAAR', 15, 28);
+    }
+    
+    // Title - Right side
+    doc.setFontSize(16);
+    doc.setTextColor(WHITE);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Design Task Brief', pageWidth - 15, 20, { align: 'right' });
+    
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Employee Assessment', pageWidth - 15, 30, { align: 'right' });
+    
+    // Decorative line
+    doc.setDrawColor(WHITE);
+    doc.setLineWidth(0.5);
+    doc.line(15, 40, pageWidth - 15, 40);
+  };
+
+  // ── Footer ──
+  const addFooter = () => {
+    const footerY = pageHeight - 20;
+    
+    // Footer line
+    doc.setDrawColor(GRAY_200);
+    doc.setLineWidth(0.5);
+    doc.line(15, footerY - 8, pageWidth - 15, footerY - 8);
+    
+    doc.setFontSize(8);
+    doc.setTextColor('#6c757d');
+    doc.setFont('helvetica', 'normal');
+    doc.text('© 2026 Crewzaar - All Rights Reserved', pageWidth / 2, footerY, { align: 'center' });
+    doc.text('Confidential - For Internal Use Only', pageWidth / 2, footerY + 6, { align: 'center' });
+  };
+
+  // ── Content ──
+  const addContent = () => {
+    let y = 55;
+    const leftMargin = 20;
+    const rightMargin = pageWidth - 20;
+    const contentWidth = rightMargin - leftMargin;
+    
+    // ── Document Title ──
+    doc.setFontSize(20);
+    doc.setTextColor(PRIMARY_DARK);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Design Task Brief', pageWidth / 2, y, { align: 'center' });
+    y += 8;
+    
+    doc.setFontSize(11);
+    doc.setTextColor(GRAY_700);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Complete the following design task as part of your assessment.', pageWidth / 2, y, { align: 'center' });
+    y += 12;
+
+    // ── Info Box ──
+    doc.setFillColor(GRAY_100);
+    doc.roundedRect(leftMargin, y, contentWidth, 35, 3, 3, 'F');
+    doc.setDrawColor(PRIMARY);
+    doc.setLineWidth(0.5);
+    doc.roundedRect(leftMargin, y, contentWidth, 35, 3, 3, 'S');
+    
+    doc.setFontSize(9);
+    doc.setTextColor(GRAY_700);
+    doc.setFont('helvetica', 'bold');
+    
+    const infoItems = [
+      { label: 'Employee:', value: employeeName || 'N/A' },
+      { label: 'Role:', value: role || 'N/A' },
+      { label: 'Task ID:', value: task?.task_id || 'N/A' },
+      { label: 'Date:', value: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) }
+    ];
+    
+    infoItems.forEach((item, index) => {
+      const x = leftMargin + 12 + (index % 2) * (contentWidth / 2);
+      const yPos = y + 6 + Math.floor(index / 2) * 14;
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(GRAY_700);
+      doc.text(item.label, x, yPos);
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(GRAY_900);
+      doc.text(item.value, x + 35, yPos);
+    });
+    
+    y += 42;
+
+    // ── Task Title ──
+    doc.setFontSize(14);
+    doc.setTextColor(PRIMARY_DARK);
+    doc.setFont('helvetica', 'bold');
+    doc.text('📋 Task Details', leftMargin, y);
+    y += 10;
+    
+    // Task Title
+    doc.setFontSize(12);
+    doc.setTextColor(GRAY_900);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Title:', leftMargin, y);
+    doc.setFont('helvetica', 'normal');
+    doc.text(task?.title || 'E-Commerce Landing Page Design', leftMargin + 25, y);
+    y += 8;
+
+    // Task Description
+    doc.setFontSize(12);
+    doc.setTextColor(GRAY_900);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Description:', leftMargin, y);
+    doc.setFont('helvetica', 'normal');
+    const description = task?.description || 'Design a modern and responsive landing page for an online fashion store.';
+    const splitDesc = doc.splitTextToSize(description, contentWidth - 25);
+    doc.text(splitDesc, leftMargin + 25, y);
+    y += splitDesc.length * 6 + 6;
+
+    // ── Requirements Box ──
+    doc.setFillColor('#f0fdf4');
+    doc.roundedRect(leftMargin, y, contentWidth, 8, 3, 3, 'F');
+    doc.setDrawColor(PRIMARY);
+    doc.setLineWidth(0.5);
+    doc.roundedRect(leftMargin, y, contentWidth, 8, 3, 3, 'S');
+    
+    doc.setFontSize(11);
+    doc.setTextColor(PRIMARY_DARK);
+    doc.setFont('helvetica', 'bold');
+    doc.text('📌 Requirements & Deliverables', leftMargin + 8, y + 6);
+    y += 16;
+
+    // Requirements list
+    const requirements = [
+      { icon: '✓', text: 'Hero Section with engaging visuals and CTA' },
+      { icon: '✓', text: 'Featured Products carousel/section' },
+      { icon: '✓', text: 'Categories grid display' },
+      { icon: '✓', text: 'Testimonials section' },
+      { icon: '✓', text: 'Footer with contact info and links' },
+    ];
+    
+    doc.setFontSize(10);
+    doc.setTextColor(GRAY_700);
+    doc.setFont('helvetica', 'normal');
+    
+    requirements.forEach((req, index) => {
+      const yPos = y + index * 7;
+      doc.text(req.icon, leftMargin + 8, yPos);
+      doc.text(req.text, leftMargin + 15, yPos);
+    });
+    
+    y += requirements.length * 7 + 12;
+
+    // ── Deliverables ──
+    doc.setFillColor('#eff6ff');
+    doc.roundedRect(leftMargin, y, contentWidth, 8, 3, 3, 'F');
+    doc.setDrawColor(BLUE);
+    doc.setLineWidth(0.5);
+    doc.roundedRect(leftMargin, y, contentWidth, 8, 3, 3, 'S');
+    
+    doc.setFontSize(11);
+    doc.setTextColor(BLUE);
+    doc.setFont('helvetica', 'bold');
+    doc.text('📦 Deliverables', leftMargin + 8, y + 6);
+    y += 16;
+
+    const deliverables = [
+      { icon: '📄', text: 'Figma File (with components and styles)' },
+      { icon: '🔗', text: 'Prototype Link (shared view)' },
+      { icon: '🖼', text: 'Exported Screens (PNG/PDF format)' },
+    ];
+    
+    doc.setFontSize(10);
+    doc.setTextColor(GRAY_700);
+    doc.setFont('helvetica', 'normal');
+    
+    deliverables.forEach((del, index) => {
+      const yPos = y + index * 7;
+      doc.text(del.icon, leftMargin + 8, yPos);
+      doc.text(del.text, leftMargin + 15, yPos);
+    });
+    
+    y += deliverables.length * 7 + 12;
+
+    // ── Guidelines ──
+    doc.setFontSize(12);
+    doc.setTextColor(PRIMARY_DARK);
+    doc.setFont('helvetica', 'bold');
+    doc.text('📝 Guidelines', leftMargin, y);
+    y += 8;
+
+    const guidelines = [
+      '• Follow UI/UX best practices and design principles',
+      '• Use proper spacing, typography and color system',
+      '• Design should be clean, modern and user-friendly',
+      '• Mobile responsive design is preferred',
+      '• Include component styles and variants',
+      '• Submit before the deadline',
+      '• Ensure original work - plagiarism will result in disqualification'
+    ];
+    
+    doc.setFontSize(9);
+    doc.setTextColor(GRAY_700);
+    doc.setFont('helvetica', 'normal');
+    
+    guidelines.forEach((guide, index) => {
+      const yPos = y + index * 6;
+      doc.text(guide, leftMargin + 4, yPos);
+    });
+    
+    y += guidelines.length * 6 + 12;
+
+    // ── Stats Box ──
+    const statsY = y;
+    const statBoxWidth = (contentWidth - 20) / 4;
+    
+    const stats = [
+      { label: 'Difficulty', value: 'Intermediate', color: '#f59e0b' },
+      { label: 'Est. Time', value: '3 Hours', color: '#6366f1' },
+      { label: 'Deadline', value: '24 Hours', color: RED },
+      { label: 'Max Score', value: '100 Points', color: PRIMARY },
+    ];
+    
+    stats.forEach((stat, index) => {
+      const x = leftMargin + 10 + index * (statBoxWidth + 6);
+      doc.setFillColor(GRAY_100);
+      doc.roundedRect(x, statsY, statBoxWidth, 22, 2, 2, 'F');
+      doc.setDrawColor(GRAY_200);
+      doc.setLineWidth(0.3);
+      doc.roundedRect(x, statsY, statBoxWidth, 22, 2, 2, 'S');
+      
+      doc.setFontSize(7);
+      doc.setTextColor(GRAY_700);
+      doc.setFont('helvetica', 'bold');
+      doc.text(stat.label, x + statBoxWidth / 2, statsY + 6, { align: 'center' });
+      
+      doc.setFontSize(9);
+      doc.setTextColor(stat.color);
+      doc.setFont('helvetica', 'bold');
+      doc.text(stat.value, x + statBoxWidth / 2, statsY + 16, { align: 'center' });
+    });
+    
+    y += 32;
+
+    // ── Important Note ──
+    doc.setFillColor('#fff3cd');
+    doc.roundedRect(leftMargin, y, contentWidth, 20, 3, 3, 'F');
+    doc.setDrawColor('#ffc107');
+    doc.setLineWidth(0.5);
+    doc.roundedRect(leftMargin, y, contentWidth, 20, 3, 3, 'S');
+    
+    doc.setFontSize(8);
+    doc.setTextColor('#856404');
+    doc.setFont('helvetica', 'italic');
+    const note = '⚠️ Important: Use of AI-generated content or plagiarism will result in disqualification.';
+    const splitNote = doc.splitTextToSize(note, contentWidth - 20);
+    doc.text(splitNote, leftMargin + 10, y + 6);
+    y += 28;
+  };
+
+  // ── Build PDF ──
+  try {
+    addHeader();
+    addContent();
+    addFooter();
+    addWatermark();
+  } catch (e) {
+    console.error('Error generating PDF:', e);
+    // Fallback: Simple PDF with error message
+    doc.setFontSize(16);
+    doc.setTextColor(RED);
+    doc.text('Error generating task details. Please try again.', 20, 50);
+  }
+
+  return doc;
+};
 
 export default function TaskUpload({ onBack, onNext }) {
   const [file, setFile] = useState(null);
@@ -21,6 +342,7 @@ export default function TaskUpload({ onBack, onNext }) {
   const [submitted, setSubmitted] = useState(false);
   const [showLeaveAlert, setShowLeaveAlert] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState(null);
+  const [isUpdatingTask, setIsUpdatingTask] = useState(false);
 
   // API state
   const [tasks, setTasks] = useState([]);
@@ -30,20 +352,32 @@ export default function TaskUpload({ onBack, onNext }) {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
 
+  // ── PDF Download Handler ──
+  const handleDownloadPDF = () => {
+    try {
+      const employeeName = sessionStorage.getItem("employee_name") || "Employee";
+      const role = sessionStorage.getItem("employee_role") || "Designer";
+      
+      const doc = generateTaskPDF(selectedTask, employeeName, role);
+      const fileName = `${selectedTask?.title?.replace(/\s+/g, '_') || 'Task'}_Brief.pdf`;
+      doc.save(fileName);
+    } catch (err) {
+      console.error('PDF download error:', err);
+      alert('Error generating PDF. Please try again.');
+    }
+  };
+
   // Browser back button prevention
   useEffect(() => {
     if (submitted) return;
 
-    // Push initial state to prevent back navigation
     window.history.pushState(null, "", window.location.href);
 
-    const handlePopState = (e) => {
-      // Show custom alert
+    const handlePopState = () => {
       setShowLeaveAlert(true);
       setPendingNavigation(() => () => {
         window.history.back();
       });
-      // Push state again to stay on page
       window.history.pushState(null, "", window.location.href);
     };
 
@@ -73,7 +407,6 @@ export default function TaskUpload({ onBack, onNext }) {
   const handleStay = () => {
     setShowLeaveAlert(false);
     setPendingNavigation(null);
-    // Push state again to prevent back navigation
     window.history.pushState(null, "", window.location.href);
   };
 
@@ -155,6 +488,58 @@ export default function TaskUpload({ onBack, onNext }) {
       setSubmitError(
         "Network error. Please check your connection and try again.",
       );
+    }
+  };
+
+  // ── Handle Proceed with API call ──
+  const handleProceed = async () => {
+    const employeeId = sessionStorage.getItem("employee_id");
+
+    if (!employeeId) {
+      alert("Employee ID not found. Please try again.");
+      return;
+    }
+
+    setIsUpdatingTask(true);
+
+    try {
+      const response = await fetch(SummaryApi.createorupdatependingtasks.url, {
+        method: SummaryApi.createorupdatependingtasks.method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          employee_id: Number(employeeId),
+          pending_task: "communication",
+          wizard_step: 3,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Update session storage
+        sessionStorage.setItem("wizardStep", "3");
+        sessionStorage.setItem("verification_screen", "communication");
+        
+        // Dispatch events for listeners
+        window.dispatchEvent(new Event("storage"));
+        window.dispatchEvent(new Event("wizardStepChange"));
+
+        // Navigate to next step
+        if (onNext) {
+          onNext();
+        } else {
+          window.location.href = "/employee-wizard";
+        }
+      } else {
+        alert(result.message || "Failed to update status. Please try again.");
+      }
+    } catch (err) {
+      console.error("Error updating pending task:", err);
+      alert("Unable to continue. Please check your connection.");
+    } finally {
+      setIsUpdatingTask(false);
     }
   };
 
@@ -256,8 +641,43 @@ export default function TaskUpload({ onBack, onNext }) {
       )}
 
       <div style={s.container}>
-        {/* Header */}
-        <div style={s.header}></div>
+        {/* Header with Logo and Download Button */}
+        <div style={s.header}>
+          <div style={s.headerLeft}>
+            <img 
+              src={companyLogo} 
+              alt="Company Logo" 
+              style={{ 
+                height: 36, 
+                width: 'auto',
+                marginRight: 12,
+                objectFit: 'contain'
+              }} 
+            />
+            <h1 style={s.headerTitle}>Task Upload</h1>
+          </div>
+          {!submitted && selectedTask && !loadingTasks && (
+            <button 
+              onClick={handleDownloadPDF}
+              style={s.downloadPdfBtn}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = '#3d8c08';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#4CAF0A';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              Download PDF
+            </button>
+          )}
+        </div>
 
         {/* Task selector */}
         {tasks.length > 1 && (
@@ -310,14 +730,25 @@ export default function TaskUpload({ onBack, onNext }) {
                 </div>
               )}
               <button
-                style={s.submitBtn}
-                onClick={() => {
-                  sessionStorage.setItem("wizardStep", "3");
-                  sessionStorage.setItem("verification_screen", "task");
-                  window.dispatchEvent(new Event("wizardStepChange"));
+                onClick={handleProceed}
+                disabled={isUpdatingTask}
+                style={{
+                  ...s.submitBtn,
+                  opacity: isUpdatingTask ? 0.7 : 1,
+                  cursor: isUpdatingTask ? "not-allowed" : "pointer",
+                  marginBottom: 14,
                 }}
               >
-                Proceed to Next Step →
+                {isUpdatingTask ? (
+                  <>
+                    <div style={s.btnSpinner} />
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    Proceed to Next Step →
+                  </>
+                )}
               </button>
               <div
                 style={{
@@ -892,6 +1323,31 @@ const s = {
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 20,
+  },
+  headerLeft: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: 700,
+    color: "#0f172a",
+    margin: 0,
+  },
+  downloadPdfBtn: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    padding: "8px 18px",
+    borderRadius: 8,
+    border: "none",
+    background: "#4CAF0A",
+    color: "#fff",
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: "pointer",
+    transition: "all 0.2s ease",
   },
   taskSelectorWrap: {
     marginBottom: 16,

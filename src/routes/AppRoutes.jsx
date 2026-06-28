@@ -1,6 +1,6 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import { useEffect } from "react";
-import WebsiteRoutes from "../modules/website/routes";          // ← correct import
+import WebsiteRoutes from "../modules/website/routes";
 import EmployeeWizardRoutes from "../modules/employeewizard/routes";
 import EmployeeRoutes from "../modules/employee/routes";
 
@@ -19,14 +19,14 @@ const AppRoutes = () => {
     <>
       <ScrollToTop />
       <Routes>
-        {/* Main website routes */}
-        <Route path="/*" element={<WebsiteRoutes />} />
-        
-        {/* Employee wizard routes */}
-        <Route path="/employee-wizard/*" element={<EmployeeWizardRoutes />} />
-        
-        {/* Employee panel routes */}
+        {/* Employee panel — must come BEFORE the wildcard website route */}
         <Route path="/employee-panel/*" element={<EmployeeRoutes />} />
+
+        {/* Employee wizard — must come BEFORE the wildcard website route */}
+        <Route path="/employee-wizard/*" element={<EmployeeWizardRoutes />} />
+
+        {/* Main website routes — wildcard last so it doesn't swallow other paths */}
+        <Route path="/*" element={<WebsiteRoutes />} />
       </Routes>
     </>
   );

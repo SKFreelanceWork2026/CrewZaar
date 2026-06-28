@@ -115,8 +115,15 @@ getprofileimage: {
   },
 
 
+  getPendingTasks: {
+    url: `${backendDomain}/employeepanel/getPendingTasks.php`,
+    method: "POST",
+  },
 
-
+  createorupdatependingtasks: {
+    url: `${backendDomain}/employeepanel/updatePendingTask.php`,
+    method: "POST",
+  },
 
 
 

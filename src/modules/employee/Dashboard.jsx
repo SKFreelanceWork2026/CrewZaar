@@ -1,77 +1,98 @@
-// Dashboard.jsx - Clean version without sidebar and header
+// modules/employee/Dashboard.jsx
+// Renders ONLY the page content — Header + Sidebar live in components/Layout.jsx
 import { useState, useEffect } from "react";
 import {
   Target, Eye, Briefcase, Award, TrendingUp,
   CheckCircle, Calendar, MapPin, BarChart2, Clock,
   Rocket, Lightbulb, Cloud, Plus, ChevronRight,
-  User, BadgeCheck, Star, Search, Settings,
-  Bell, Flag, ChevronDown, Home, FileText,
-  BookOpen, MessageSquare, ClipboardList,
-  LayoutDashboard, LogOut, Menu, X
+  User, BadgeCheck, Star,
 } from "lucide-react";
+import SummaryApi from "../../common/index";
+import Stepper from "../employeewizard/components/Stepper";
+import {
+  getFlowSteps,
+  getCurrentFlowIndex,
+} from "../employeewizard/components/stepperConfig";
+
+const GREEN = "#4CAF0A";
 
 /* ─────────────────── SHARED ATOMS ─────────────────── */
 
-const Avatar = ({ name, size = 96 }) => {
+const Avatar = ({ name, imgSrc, size = 88 }) => {
+  const [imgError, setImgError] = useState(false);
   const initials = name
-    ? name.split(" ").slice(0, 2).map(n => n[0]).join("").toUpperCase()
+    ? name.split(" ").slice(0, 2).map((n) => n[0]).join("").toUpperCase()
     : "JD";
+
+  if (imgSrc && !imgError) {
+    return (
+      <img
+        src={imgSrc}
+        alt={name}
+        onError={() => setImgError(true)}
+        style={{
+          width: size, height: size, borderRadius: "50%", objectFit: "cover",
+          border: "3px solid #fff", boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+        }}
+      />
+    );
+  }
   return (
     <div style={{
       width: size, height: size, borderRadius: "50%",
-      background: "linear-gradient(135deg, #4CAF0A, #2d7a06)",
+      background: `linear-gradient(135deg, ${GREEN}, #2d7a06)`,
       display: "flex", alignItems: "center", justifyContent: "center",
       border: "3px solid #fff", boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-      flexShrink: 0
+      flexShrink: 0,
     }}>
       <span style={{ color: "#fff", fontSize: size * 0.34, fontWeight: 700 }}>{initials}</span>
     </div>
   );
 };
 
-const Badge = ({ children, color = "#4CAF0A", bg = "#edffd6" }) => (
+const Badge = ({ children, color = GREEN, bg = "#edffd6" }) => (
   <span style={{
     background: bg, color, fontSize: 11, fontWeight: 600,
     padding: "3px 10px", borderRadius: 20,
-    display: "inline-flex", alignItems: "center", gap: 4
+    display: "inline-flex", alignItems: "center", gap: 4,
   }}>{children}</span>
 );
 
-const ProgressBar = ({ value, color = "#4CAF0A", height = 6 }) => (
+const ProgressBar = ({ value, color = GREEN, height = 6 }) => (
   <div style={{ background: "#e5e7eb", borderRadius: 4, height, overflow: "hidden", marginTop: 4 }}>
-    <div style={{ width: `${value}%`, background: color, height: "100%", borderRadius: 4, transition: "width 0.6s ease" }} />
+    <div style={{ width: `${Math.min(value, 100)}%`, background: color, height: "100%", borderRadius: 4, transition: "width 0.6s ease" }} />
   </div>
 );
 
 const Card = ({ children, style = {} }) => (
   <div style={{
     background: "#fff", borderRadius: 12, padding: 20,
-    boxShadow: "0 1px 3px rgba(0,0,0,0.06)", border: "1px solid #f0f0f0", ...style
+    boxShadow: "0 1px 3px rgba(0,0,0,0.06)", border: "1px solid #f0f0f0", ...style,
   }}>{children}</div>
 );
 
 const GreenButton = ({ children, outline = false, style = {}, onClick }) => (
   <button onClick={onClick} style={{
-    background: outline ? "transparent" : "#4CAF0A",
-    color: outline ? "#4CAF0A" : "#fff",
-    border: outline ? "1.5px solid #4CAF0A" : "none",
+    background: outline ? "transparent" : GREEN,
+    color: outline ? GREEN : "#fff",
+    border: outline ? `1.5px solid ${GREEN}` : "none",
     borderRadius: 8, padding: "8px 16px", fontWeight: 600, fontSize: 13,
-    cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, ...style
+    cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, ...style,
   }}>{children}</button>
 );
 
 const RadioOption = ({ label, sub, selected, onClick }) => (
   <div onClick={onClick} style={{
-    background: selected ? "#4CAF0A" : "transparent",
+    background: selected ? GREEN : "transparent",
     color: selected ? "#fff" : "#374151",
     border: selected ? "none" : "1.5px solid #e5e7eb",
     borderRadius: 10, padding: "10px 14px", marginBottom: 8, cursor: "pointer",
-    display: "flex", alignItems: "center", gap: 10, transition: "all 0.15s"
+    display: "flex", alignItems: "center", gap: 10, transition: "all 0.15s",
   }}>
     <div style={{
       width: 17, height: 17, borderRadius: "50%",
       border: `2px solid ${selected ? "#fff" : "#9ca3af"}`,
-      display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0
+      display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
     }}>
       {selected && <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#fff" }} />}
     </div>
@@ -92,23 +113,23 @@ const SkillBar = ({ name, value }) => (
   </div>
 );
 
-const StatCard = ({ icon: Icon, iconColor = "#4CAF0A", iconBg = "#f3ffe6", label, value, badge, delta }) => (
+const StatCard = ({ icon: Icon, iconColor = GREEN, iconBg = "#f3ffe6", label, value, badge, delta }) => (
   <Card style={{ padding: 20 }}>
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
       <div style={{ width: 40, height: 40, borderRadius: 10, background: iconBg, display: "flex", alignItems: "center", justifyContent: "center" }}>
         <Icon size={20} color={iconColor} strokeWidth={2} />
       </div>
-      {badge && <Badge color="#4CAF0A" bg="#edffd6">{badge}</Badge>}
-      {delta && <span style={{ color: "#4CAF0A", fontSize: 12, fontWeight: 700 }}>{delta}</span>}
+      {badge && <Badge color={GREEN} bg="#edffd6">{badge}</Badge>}
+      {delta && <span style={{ color: GREEN, fontSize: 12, fontWeight: 700 }}>{delta}</span>}
     </div>
     <div style={{ fontSize: 28, fontWeight: 700, color: "#111827", lineHeight: 1.1 }}>{value}</div>
     <div style={{ fontSize: 12, color: "#6b7280", marginTop: 4 }}>{label}</div>
   </Card>
 );
 
-const VerificationItem = ({ label, sub }) => (
+const VerificationItem = ({ label, sub, done = true }) => (
   <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 14 }}>
-    <CheckCircle size={18} color="#4CAF0A" strokeWidth={2} style={{ flexShrink: 0, marginTop: 1 }} />
+    <CheckCircle size={18} color={done ? GREEN : "#d1d5db"} strokeWidth={2} style={{ flexShrink: 0, marginTop: 1 }} />
     <div>
       <div style={{ fontWeight: 600, fontSize: 13, color: "#111827" }}>{label}</div>
       <div style={{ fontSize: 12, color: "#6b7280" }}>{sub}</div>
@@ -119,7 +140,7 @@ const VerificationItem = ({ label, sub }) => (
 const ExperienceItem = ({ title, company, period, duration, bullets, tags, isLast = false }) => (
   <div style={{ display: "flex", gap: 14, paddingBottom: isLast ? 0 : 24, marginBottom: isLast ? 0 : 4, borderBottom: isLast ? "none" : "1px solid #f3f4f6" }}>
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 4 }}>
-      <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#4CAF0A", flexShrink: 0, zIndex: 1 }} />
+      <div style={{ width: 12, height: 12, borderRadius: "50%", background: GREEN, flexShrink: 0, zIndex: 1 }} />
       {!isLast && <div style={{ flex: 1, width: 2, background: "#c8f59a", marginTop: 4, borderRadius: 2 }} />}
     </div>
     <div style={{ flex: 1 }}>
@@ -134,7 +155,7 @@ const ExperienceItem = ({ title, company, period, duration, bullets, tags, isLas
       <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 12 }}>
         {bullets.map((b, i) => (
           <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: 13, color: "#374151" }}>
-            <div style={{ flexShrink: 0, marginTop: 6, width: 5, height: 5, borderRadius: "50%", background: "#4CAF0A" }} />
+            <div style={{ flexShrink: 0, marginTop: 6, width: 5, height: 5, borderRadius: "50%", background: GREEN }} />
             {b}
           </div>
         ))}
@@ -171,48 +192,459 @@ export default function Dashboard() {
   const [availability, setAvailability] = useState("immediate");
   const [jobType, setJobType] = useState("permanent");
   const [employee, setEmployee] = useState(null);
+  const [profileImg, setProfileImg] = useState(null);
+  const [loading, setLoading] = useState(true);
+  
+  // Wizard Resume Modal State
+  const [showResumeModal, setShowResumeModal] = useState(false);
+  const [flowSteps, setFlowSteps] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentStepLabel, setCurrentStepLabel] = useState("");
+  const [pendingTaskData, setPendingTaskData] = useState(null);
+  const [isModalReady, setIsModalReady] = useState(false);
+  const [modalDismissed, setModalDismissed] = useState(false);
 
-  useEffect(() => {
+  // ─── Fetch Pending Tasks from API ──────────────────────────────────
+  const fetchPendingTasks = async (employeeId, emp) => {
+    if (!employeeId) return;
+
     try {
-      const data = sessionStorage.getItem("employee");
-      if (data) setEmployee(JSON.parse(data));
-    } catch (e) {
-      console.error("Error parsing employee data:", e);
+      const response = await fetch(SummaryApi.getPendingTasks.url, {
+        method: SummaryApi.getPendingTasks.method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ employee_id: employeeId }),
+      });
+
+      if (!response.ok) return;
+
+      const result = await response.json();
+
+      if (result.success && result.data) {
+        setPendingTaskData(result.data);
+
+        const pendingTask = result.data;
+
+        // Show modal only if wizard is incomplete (step 1–4) AND modal hasn't been dismissed
+        if (pendingTask.wizard_step >= 1 && pendingTask.wizard_step < 5 && !modalDismissed) {
+          const step = pendingTask.wizard_step;
+          const role = emp?.role || sessionStorage.getItem("role") || sessionStorage.getItem("employee_role") || "";
+          const steps = getFlowSteps(role);
+
+          setFlowSteps(steps);
+          setCurrentIndex(getCurrentFlowIndex(steps, step));
+
+          const current = steps.find((s) => s.wizardStep === step);
+          setCurrentStepLabel(current?.label || `Step ${step}`);
+
+          setIsModalReady(true);
+          setShowResumeModal(true);
+        }
+      }
+    } catch (error) {
+      console.error("❌ Error fetching pending tasks:", error);
     }
+  };
+
+  // ─── Fetch Employee Data ──────────────────────────────────────────
+  useEffect(() => {
+    const loadEmployeeData = async () => {
+      try {
+        const data = sessionStorage.getItem("employee");
+
+        if (data) {
+          const emp = JSON.parse(data);
+          setEmployee(emp);
+
+          if (emp.profile_image) {
+            setProfileImg(`${SummaryApi.getprofileimage.url}${emp.profile_image}`);
+          }
+
+          if (emp.preferred_work_mode) {
+            const mode = emp.preferred_work_mode.toLowerCase();
+            if (mode.includes("hybrid")) setWorkMode("hybrid");
+            else if (mode.includes("remote") || mode.includes("home")) setWorkMode("wfh");
+            else if (mode.includes("site")) setWorkMode("onsite");
+          }
+
+          if (emp.notice_period) {
+            const np = emp.notice_period.toLowerCase();
+            if (np.includes("15")) setAvailability("15days");
+            else if (np.includes("30") || np.includes("1 month")) setAvailability("30days");
+            else setAvailability("immediate");
+          }
+
+          const employeeId = emp.employee_id || sessionStorage.getItem("employee_id");
+
+          if (employeeId) {
+            await fetchPendingTasks(employeeId, emp);
+          }
+        }
+      } catch (e) {
+        console.error("Error loading employee data:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadEmployeeData();
+  }, []);
+
+  // ─── Listen for wizard completion events ──────────────────────────
+  useEffect(() => {
+    const handleWizardComplete = () => {
+      // Close modal when wizard is completed
+      setShowResumeModal(false);
+      setIsModalReady(false);
+      setModalDismissed(true);
+    };
+
+    const handleWizardStepChange = () => {
+      // Check if wizard is complete (step 5)
+      const step = parseInt(sessionStorage.getItem("wizardStep") || "0", 10);
+      if (step === 5) {
+        setShowResumeModal(false);
+        setIsModalReady(false);
+        setModalDismissed(true);
+      }
+    };
+
+    window.addEventListener("wizardComplete", handleWizardComplete);
+    window.addEventListener("wizardStepChange", handleWizardStepChange);
+
+    return () => {
+      window.removeEventListener("wizardComplete", handleWizardComplete);
+      window.removeEventListener("wizardStepChange", handleWizardStepChange);
+    };
   }, []);
 
   const getRoleDisplay = () =>
     employee?.role
-      ? employee.role.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase())
-      : "Full Stack Developer";
+      ? employee.role.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
+      : "Employee";
 
-  if (!employee) {
+  const getSkillsArray = () => {
+    if (!employee?.skills) return [];
+    if (typeof employee.skills === "string") {
+      return employee.skills.split(",").map((s) => s.trim()).filter(Boolean);
+    }
+    return [];
+  };
+
+  // Handle Continue Wizard — opens wizard in new tab at the exact saved step
+  const handleContinueWizard = () => {
+    const step       = pendingTaskData?.wizard_step || 1;
+    const screen     = pendingTaskData?.verification_screen || "";
+    const role       = employee?.role || sessionStorage.getItem("role") || sessionStorage.getItem("employee_role") || "";
+    const employeeId = employee?.employee_id || sessionStorage.getItem("employee_id") || "";
+
+    const params = new URLSearchParams({
+      step,
+      role,
+      employee_id: employeeId,
+      verification_screen: screen,
+    });
+
+    // Open wizard in new tab
+    const wizardWindow = window.open(`/employee-wizard?${params.toString()}`, "_blank");
+    
+    // Close modal immediately when clicking continue
+    setShowResumeModal(false);
+    setIsModalReady(false);
+    setModalDismissed(true);
+
+    // If wizard window was blocked or closed, allow reopening
+    if (!wizardWindow) {
+      // Prompt user to allow popups or open in same tab
+      if (window.confirm("Please allow popups for this site, or click OK to open in the same tab.")) {
+        window.location.href = `/employee-wizard?${params.toString()}`;
+      } else {
+        // Reopen modal if user cancels
+        setModalDismissed(false);
+        setIsModalReady(true);
+        setShowResumeModal(true);
+      }
+    }
+
+    // Set up listener for wizard completion
+    const checkWizardComplete = setInterval(() => {
+      const step = parseInt(sessionStorage.getItem("wizardStep") || "0", 10);
+      if (step === 5) {
+        setModalDismissed(true);
+        clearInterval(checkWizardComplete);
+      }
+    }, 1000);
+
+    // Clean up interval after 5 minutes
+    setTimeout(() => clearInterval(checkWizardComplete), 300000);
+  };
+
+  // Handle dismissing the modal (user clicks outside or cancels)
+  const handleDismissModal = () => {
+    setShowResumeModal(false);
+    setIsModalReady(false);
+    setModalDismissed(true);
+  };
+
+  // ─── LOADING STATE ────────────────────────────────────────────────
+  if (loading || !employee) {
     return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "400px", background: "#f4f6f8" }}>
+      <div style={{ 
+        position: "fixed", 
+        inset: 0, 
+        display: "flex", 
+        alignItems: "center", 
+        justifyContent: "center",
+        background: "#f8fafc",
+        zIndex: 9999,
+      }}>
         <div style={{ textAlign: "center" }}>
-          <div style={{ width: 48, height: 48, border: "3px solid #e5e7eb", borderTop: "3px solid #4CAF0A", borderRadius: "50%", animation: "spin 1s linear infinite", margin: "0 auto 16px" }} />
-          <p style={{ color: "#6b7280", fontSize: 14 }}>Loading dashboard...</p>
+          <div style={{
+            width: 48, height: 48, border: "3px solid #e5e7eb", borderTop: `3px solid ${GREEN}`,
+            borderRadius: "50%", animation: "spin 1s linear infinite", margin: "0 auto 16px",
+          }} />
+          <p style={{ color: "#6b7280", fontSize: 14 }}>Loading...</p>
         </div>
-        <style>{`@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}`}</style>
+        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
       </div>
     );
   }
 
-  return (
-    <div style={{ fontFamily: "'Inter',-apple-system,BlinkMacSystemFont,sans-serif", background: "#f4f6f8", minHeight: "100vh", padding: "24px" }}>
+  const skills = getSkillsArray();
+  const isVerified = sessionStorage.getItem("profile_verified") === "1";
+  const isDocVerified = sessionStorage.getItem("document_verified") === "1";
 
-      {/* Welcome bar */}
-      <div style={{ background: "#fff", borderRadius: "12px", border: "1px solid #e5e7eb", padding: "20px 28px", marginBottom: 24 }}>
-        <div style={{ fontWeight: 700, fontSize: 20, color: "#111827" }}>Welcome back, {employee.full_name}</div>
-        <div style={{ fontSize: 13, color: "#6b7280", marginTop: 4, display: "flex", alignItems: "center", gap: 6 }}>
-          <CheckCircle size={13} color="#4CAF0A" />
-          Your profile is verified and visible to top companies
+  // ─── IF MODAL IS ACTIVE - Show only the modal ──────────────────
+  if (showResumeModal && isModalReady) {
+    return (
+      <>
+        {/* Full screen overlay */}
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(255,255,255,0.6)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            zIndex: 9998,
+          }}
+          onClick={handleDismissModal}
+        />
+
+        {/* Resume Modal */}
+        <div
+          style={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "90%",
+            maxWidth: 820,
+            background: "#fff",
+            borderRadius: 24,
+            padding: 40,
+            boxShadow: "0 40px 80px rgba(0,0,0,0.25)",
+            zIndex: 9999,
+            maxHeight: "90vh",
+            overflowY: "auto",
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Close button */}
+          <button
+            onClick={handleDismissModal}
+            style={{
+              position: "absolute",
+              top: 16,
+              right: 16,
+              background: "none",
+              border: "none",
+              fontSize: 24,
+              cursor: "pointer",
+              color: "#9ca3af",
+              padding: 8,
+              borderRadius: 8,
+              transition: "all 0.2s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "#f3f4f6";
+              e.currentTarget.style.color = "#374151";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "none";
+              e.currentTarget.style.color = "#9ca3af";
+            }}
+          >
+            ×
+          </button>
+
+          {/* Header */}
+          <div style={{ textAlign: "center", marginBottom: 28 }}>
+            <div style={{
+              width: 72,
+              height: 72,
+              borderRadius: "50%",
+              background: `linear-gradient(135deg, ${GREEN}, #2d7a06)`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 16px",
+            }}>
+              <span style={{ fontSize: 32, color: "#fff" }}>📝</span>
+            </div>
+            <h2
+              style={{
+                fontSize: 28,
+                fontWeight: 700,
+                color: "#111827",
+                marginBottom: 8,
+              }}
+            >
+              Resume Your Application
+            </h2>
+            <p style={{ color: "#6b7280", fontSize: 14, maxWidth: 500, margin: "0 auto" }}>
+              You have an incomplete Employee Wizard. Continue exactly where you left off.
+            </p>
+          </div>
+
+          {/* Exact Same Stepper from Employee Wizard */}
+          {flowSteps.length > 0 ? (
+            <Stepper steps={flowSteps} currentIndex={currentIndex} />
+          ) : (
+            <div style={{ textAlign: "center", padding: 20, color: "#6b7280" }}>
+              Loading wizard steps...
+            </div>
+          )}
+
+          {/* Current Step Info */}
+          <div
+            style={{
+              marginTop: 28,
+              padding: 20,
+              background: "#f8fafc",
+              borderRadius: 12,
+              border: "1px solid #e5e7eb",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{
+                width: 40,
+                height: 40,
+                borderRadius: 10,
+                background: `linear-gradient(135deg, ${GREEN}, #2d7a06)`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}>
+                <span style={{ fontSize: 18, color: "#fff" }}>📍</span>
+              </div>
+              <div>
+                <div style={{ fontWeight: 600, color: "#374151", fontSize: 13 }}>
+                  Current Step
+                </div>
+                <div style={{ color: GREEN, fontSize: 18, fontWeight: 700 }}>
+                  {currentStepLabel || "Loading..."}
+                </div>
+              </div>
+            </div>
+            <p style={{ marginTop: 14, color: "#6b7280", fontSize: 13, lineHeight: 1.6, paddingLeft: 52 }}>
+              Click <strong>Continue</strong> to resume your onboarding. The Employee Wizard will open in a new tab from your saved step.
+            </p>
+          </div>
+
+          {/* Buttons */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: 12,
+              marginTop: 28,
+            }}
+          >
+            <button
+              onClick={handleDismissModal}
+              style={{
+                padding: "14px 32px",
+                borderRadius: 12,
+                border: "1.5px solid #d1d5db",
+                background: "#fff",
+                color: "#374151",
+                fontWeight: 600,
+                cursor: "pointer",
+                fontSize: 15,
+                transition: "all 0.2s",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#f3f4f6";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "#fff";
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleContinueWizard}
+              style={{
+                background: GREEN,
+                color: "#fff",
+                border: "none",
+                padding: "14px 48px",
+                borderRadius: 12,
+                fontWeight: 700,
+                cursor: "pointer",
+                fontSize: 16,
+                transition: "all 0.2s",
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                boxShadow: "0 4px 16px rgba(76, 175, 10, 0.35)",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#3d9e00";
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.boxShadow = "0 6px 24px rgba(76, 175, 10, 0.45)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = GREEN;
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "0 4px 16px rgba(76, 175, 10, 0.35)";
+              }}
+            >
+              Continue to Wizard →
+            </button>
+          </div>
+
+          {/* Info text at bottom */}
+          <div
+            style={{
+              textAlign: "center",
+              marginTop: 16,
+              fontSize: 12,
+              color: "#9ca3af",
+            }}
+          >
+            You must complete your wizard to access the dashboard
+          </div>
         </div>
-      </div>
+      </>
+    );
+  }
 
+  // ─── DASHBOARD RENDER (only when no modal) ──────────────────────────
+  return (
+    <div style={{ 
+      fontFamily: "'Inter',-apple-system,BlinkMacSystemFont,sans-serif", 
+      width: "100%",
+    }}>
       {/* ── STATS ROW ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16, marginBottom: 24 }}>
-        <StatCard icon={Target} iconBg="#f3ffe6" iconColor="#4CAF0A" label="Profile Strength" value="92%" badge="Excellent" />
+      <div style={{ 
+        display: "grid", 
+        gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", 
+        gap: 16, 
+        marginBottom: 24 
+      }}>
+        <StatCard icon={Target} iconBg="#f3ffe6" iconColor={GREEN} label="Profile Strength" value="92%" badge="Excellent" />
         <StatCard icon={Eye} iconBg="#eff6ff" iconColor="#3b82f6" label="Profile Views" value="247" delta="+12%" />
         <StatCard icon={Briefcase} iconBg="#fff7ed" iconColor="#ea580c" label="Hiring Requests" value="15" delta="+8%" />
         <StatCard icon={Award} iconBg="#fdf4ff" iconColor="#a855f7" label="Skill Score" value="89%" />
@@ -220,22 +652,25 @@ export default function Dashboard() {
       </div>
 
       {/* ── 3-COLUMN GRID ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "260px 1fr 252px", gap: 20 }}>
-
-        {/* LEFT */}
+      <div style={{ 
+        display: "grid", 
+        gridTemplateColumns: "1fr 2fr 1fr", 
+        gap: 20,
+        width: "100%"
+      }}>
+        {/* LEFT COLUMN */}
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-
           {/* Profile card */}
           <Card>
             <div style={{ textAlign: "center" }}>
               <div style={{ display: "flex", justifyContent: "center", marginBottom: 10 }}>
-                <Avatar name={employee.full_name} size={88} />
+                <Avatar name={employee.full_name} imgSrc={profileImg} size={88} />
               </div>
               <div style={{ fontWeight: 700, fontSize: 17, color: "#111827" }}>{employee.full_name}</div>
               <div style={{ color: "#6b7280", fontSize: 13, margin: "4px 0 10px" }}>{getRoleDisplay()}</div>
               <div style={{ display: "flex", justifyContent: "center", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
-                <Badge color="#4CAF0A" bg="#edffd6"><CheckCircle size={11} /> Verified</Badge>
-                <Badge color="#3b82f6" bg="#eff6ff">IT Department</Badge>
+                {isVerified && <Badge color={GREEN} bg="#edffd6"><CheckCircle size={11} /> Verified</Badge>}
+                {employee.member_type_id && <Badge color="#3b82f6" bg="#eff6ff">IT Department</Badge>}
               </div>
               <div style={{ marginBottom: 14 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "#6b7280", marginBottom: 4 }}>
@@ -253,14 +688,20 @@ export default function Dashboard() {
           {/* Verification */}
           <Card>
             <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 16 }}>Verification Status</div>
-            <VerificationItem label="Skill Test" sub="Score: 89%" />
-            <VerificationItem label="Task Evaluation" sub="Completed" />
-            <VerificationItem label="Communication Test" sub="Score: 92%" />
-            <VerificationItem label="Background Verification" sub="Verified on May 1, 2026" />
-            <div style={{ background: "#f3ffe6", border: "1px solid #c8f59a", borderRadius: 10, padding: "10px 12px", fontSize: 12, color: "#2d7a06", display: "flex", gap: 8, alignItems: "flex-start" }}>
-              <BadgeCheck size={15} color="#4CAF0A" style={{ flexShrink: 0, marginTop: 1 }} />
-              Congratulations! You are fully verified and visible to top companies.
-            </div>
+            <VerificationItem label="Skill Test" sub="Score: 89%" done={isVerified} />
+            <VerificationItem label="Task Evaluation" sub="Completed" done={isVerified} />
+            <VerificationItem label="Communication Test" sub="Score: 92%" done={isVerified} />
+            <VerificationItem label="Background Verification" sub={isDocVerified ? "Verified" : "Pending"} done={isDocVerified} />
+            {isVerified ? (
+              <div style={{ background: "#f3ffe6", border: "1px solid #c8f59a", borderRadius: 10, padding: "10px 12px", fontSize: 12, color: "#2d7a06", display: "flex", gap: 8, alignItems: "flex-start" }}>
+                <BadgeCheck size={15} color={GREEN} style={{ flexShrink: 0, marginTop: 1 }} />
+                Congratulations! You are fully verified and visible to top companies.
+              </div>
+            ) : (
+              <div style={{ background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 10, padding: "10px 12px", fontSize: 12, color: "#92400e" }}>
+                Complete verification to get visible to top companies.
+              </div>
+            )}
           </Card>
 
           {/* Profile Strength */}
@@ -271,7 +712,7 @@ export default function Dashboard() {
               { label: "Skills & Tests", val: 90 },
               { label: "Experience", val: 92 },
               { label: "Projects", val: 88 },
-              { label: "Verification", val: 100 },
+              { label: "Verification", val: isVerified ? 100 : 40 },
             ].map((s, i) => (
               <div key={i} style={{ marginBottom: 11 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 3 }}>
@@ -288,9 +729,8 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* MIDDLE */}
+        {/* MIDDLE COLUMN */}
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-
           {/* Experience */}
           <Card>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
@@ -328,16 +768,28 @@ export default function Dashboard() {
                 <GreenButton outline style={{ fontSize: 12 }}>View All <ChevronRight size={13} /></GreenButton>
               </div>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 28px" }}>
-              {[{ name: "JavaScript", value: 90 }, { name: "React", value: 88 }, { name: "Node.js", value: 85 }, { name: "TypeScript", value: 87 }, { name: "PostgreSQL", value: 82 }, { name: "AWS", value: 80 }].map((s, i) => <SkillBar key={i} {...s} />)}
-            </div>
+            {skills.length > 0 ? (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 28px" }}>
+                {skills.slice(0, 6).map((skill, i) => (
+                  <SkillBar key={i} name={skill} value={[90, 88, 85, 87, 82, 80][i] ?? 80} />
+                ))}
+              </div>
+            ) : (
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 28px" }}>
+                {[
+                  { name: "JavaScript", value: 90 }, { name: "React", value: 88 },
+                  { name: "Node.js", value: 85 }, { name: "TypeScript", value: 87 },
+                  { name: "PostgreSQL", value: 82 }, { name: "AWS", value: 80 },
+                ].map((s, i) => <SkillBar key={i} {...s} />)}
+              </div>
+            )}
           </Card>
 
-          {/* Jobs */}
+          {/* Job Opportunities */}
           <Card>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
               <div style={{ fontWeight: 700, fontSize: 16 }}>Job Opportunities</div>
-              <button style={{ color: "#4CAF0A", fontSize: 13, fontWeight: 600, background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
+              <button style={{ color: GREEN, fontSize: 13, fontWeight: 600, background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}>
                 View All <ChevronRight size={14} />
               </button>
             </div>
@@ -347,13 +799,12 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* RIGHT */}
+        {/* RIGHT COLUMN */}
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-
           {/* Availability */}
           <Card>
             <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 14 }}>Availability</div>
-            {[{ key: "immediate", label: "Immediate Joiner", sub: "Available now" }, { key: "15days", label: "15 Days", sub: "Notice period" }, { key: "30days", label: "30 Days", sub: "Notice period" }].map(opt => (
+            {[{ key: "immediate", label: "Immediate Joiner", sub: "Available now" }, { key: "15days", label: "15 Days", sub: "Notice period" }, { key: "30days", label: "30 Days", sub: "Notice period" }].map((opt) => (
               <RadioOption key={opt.key} label={opt.label} sub={opt.sub} selected={availability === opt.key} onClick={() => setAvailability(opt.key)} />
             ))}
           </Card>
@@ -362,11 +813,11 @@ export default function Dashboard() {
           <Card>
             <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 14 }}>Work Preferences</div>
             <div style={{ fontSize: 12, color: "#6b7280", marginBottom: 8, fontWeight: 500 }}>Job Type</div>
-            {[{ key: "permanent", label: "Permanent" }, { key: "contract", label: "Contract" }].map(opt => (
+            {[{ key: "permanent", label: "Permanent" }, { key: "contract", label: "Contract" }].map((opt) => (
               <RadioOption key={opt.key} label={opt.label} selected={jobType === opt.key} onClick={() => setJobType(opt.key)} />
             ))}
             <div style={{ fontSize: 12, color: "#6b7280", margin: "14px 0 8px", fontWeight: 500 }}>Work Mode</div>
-            {[{ key: "wfh", label: "Work From Home" }, { key: "hybrid", label: "Hybrid" }, { key: "onsite", label: "On-site" }].map(opt => (
+            {[{ key: "wfh", label: "Work From Home" }, { key: "hybrid", label: "Hybrid" }, { key: "onsite", label: "On-site" }].map((opt) => (
               <RadioOption key={opt.key} label={opt.label} selected={workMode === opt.key} onClick={() => setWorkMode(opt.key)} />
             ))}
           </Card>
@@ -377,7 +828,7 @@ export default function Dashboard() {
             {[
               { icon: BarChart2, label: "Profile Rank", value: "Top 5%", color: "#8b5cf6" },
               { icon: Clock, label: "Avg. Response", value: "2 hours", color: "#3b82f6" },
-              { icon: Target, label: "Match Rate", value: "94%", color: "#4CAF0A" },
+              { icon: Target, label: "Match Rate", value: "94%", color: GREEN },
             ].map(({ icon: Icon, label, value, color }, i) => (
               <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: i < 2 ? 14 : 0 }}>
                 <span style={{ fontSize: 13, color: "#6b7280", display: "flex", alignItems: "center", gap: 7 }}>
@@ -392,8 +843,8 @@ export default function Dashboard() {
           <Card>
             <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 14 }}>Recent Activity</div>
             {[
-              { icon: Eye, color: "#4CAF0A", bg: "#f3ffe6", text: "Profile viewed by TechCorp", time: "2 hours ago" },
-              { icon: Search, color: "#3b82f6", bg: "#eff6ff", text: "New job match found", time: "5 hours ago" },
+              { icon: Eye, color: GREEN, bg: "#f3ffe6", text: "Profile viewed by TechCorp", time: "2 hours ago" },
+              { icon: Star, color: "#3b82f6", bg: "#eff6ff", text: "New job match found", time: "5 hours ago" },
               { icon: Star, color: "#8b5cf6", bg: "#f5f3ff", text: "Skill score updated", time: "1 day ago" },
             ].map(({ icon: Icon, color, bg, text, time }, i) => (
               <div key={i} style={{ display: "flex", gap: 10, marginBottom: i < 2 ? 14 : 0 }}>
@@ -411,13 +862,11 @@ export default function Dashboard() {
       </div>
 
       {/* Bottom Banner */}
-      <div style={{ marginTop: 24, background: "linear-gradient(90deg,#4CAF0A,#3a9a09)", borderRadius: 12, padding: "18px 28px", textAlign: "center" }}>
+      <div style={{ marginTop: 24, background: `linear-gradient(90deg, ${GREEN}, #3a9a09)`, borderRadius: 12, padding: "18px 28px", textAlign: "center" }}>
         <p style={{ color: "#fff", fontSize: 15, fontWeight: 600, margin: 0 }}>
           Your profile is your proof. The stronger the profile, the faster companies will hire you.
         </p>
       </div>
-
-      <style>{`* { box-sizing: border-box; } body { margin: 0; }`}</style>
     </div>
   );
 }

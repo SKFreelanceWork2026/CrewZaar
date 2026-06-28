@@ -9,6 +9,7 @@ const TIMER_DURATION = 1 * 60;
 
 export default function VerificationProcess({ onBack, onNext, timerExpired, onTimerRetake }) {
   const [questions, setQuestions] = useState([]);
+  const isLeavingRef = useRef(false);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(() => {
     return sessionStorage.getItem(SUBMITTED_KEY) === "true";
@@ -20,6 +21,7 @@ export default function VerificationProcess({ onBack, onNext, timerExpired, onTi
   });
   const [showLeaveAlert, setShowLeaveAlert] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState(null);
+  const [isUpdatingTask, setIsUpdatingTask] = useState(false);
 
   const [timeLeft, setTimeLeft] = useState(TIMER_DURATION);
   const [localTimerExpired, setLocalTimerExpired] = useState(false);
@@ -55,11 +57,17 @@ export default function VerificationProcess({ onBack, onNext, timerExpired, onTi
 
     window.history.pushState(null, "", window.location.href);
 
-    const handlePopState = (e) => {
+    const handlePopState = () => {
+      if (isLeavingRef.current) {
+        return;
+      }
+
       setShowLeaveAlert(true);
+
       setPendingNavigation(() => () => {
         window.history.back();
       });
+
       window.history.pushState(null, "", window.location.href);
     };
 
@@ -72,19 +80,25 @@ export default function VerificationProcess({ onBack, onNext, timerExpired, onTi
     };
   }, [submitted, handleBeforeUnload]);
 
-const handleLeave = () => {
-  setShowLeaveAlert(false);
+  const handleLeave = () => {
+    isLeavingRef.current = true;
 
-  window.removeEventListener("beforeunload", handleBeforeUnload);
+    setShowLeaveAlert(false);
 
-  if (pendingNavigation) {
-    pendingNavigation();
-    setPendingNavigation(null);
-  } else {
-    sessionStorage.clear();
-    window.location.href = "/";
-  }
-};
+    window.removeEventListener("beforeunload", handleBeforeUnload);
+    window.removeEventListener("popstate", handlePopState);
+
+    if (pendingNavigation) {
+      setPendingNavigation(null);
+
+      sessionStorage.clear();
+
+      window.history.back();
+    } else {
+      sessionStorage.clear();
+      window.location.href = "/";
+    }
+  };
 
   const handleStay = () => {
     setShowLeaveAlert(false);
@@ -249,6 +263,54 @@ const handleLeave = () => {
     hasAutoSubmittedRef.current = false;
     if (onTimerRetake) onTimerRetake();
     fetchQuestions();
+  };
+
+  // NEW: Handle Proceed with API call
+  const handleProceed = async () => {
+    const employeeId = sessionStorage.getItem("employee_id");
+
+    if (!employeeId) {
+      alert("Employee ID not found. Please try again.");
+      return;
+    }
+
+    setIsUpdatingTask(true);
+
+    try {
+      const response = await fetch(SummaryApi.createorupdatependingtasks.url, {
+        method: SummaryApi.createorupdatependingtasks.method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          employee_id: Number(employeeId),
+          pending_task: "communication",
+          wizard_step: 3,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Update session storage
+        sessionStorage.setItem("wizardStep", "3");
+        sessionStorage.setItem("verification_screen", "communication");
+        
+        // Dispatch events for listeners
+        window.dispatchEvent(new Event("storage"));
+        window.dispatchEvent(new Event("wizardStepChange"));
+
+        // Navigate to dashboard
+        window.location.href = "/";
+      } else {
+        alert(result.message || "Failed to update status. Please try again.");
+      }
+    } catch (err) {
+      console.error("Error updating pending task:", err);
+      alert("Unable to continue. Please check your connection.");
+    } finally {
+      setIsUpdatingTask(false);
+    }
   };
 
   const allAnswered =
@@ -519,36 +581,54 @@ const handleLeave = () => {
               </p>
 
               <button
-                onClick={() => {
-                  sessionStorage.setItem("wizardStep", "3");
-                  sessionStorage.setItem("verification_screen", "communication");
-                  window.dispatchEvent(new Event("storage"));
-                  window.dispatchEvent(new Event("wizardStepChange"));
-                }}
+                onClick={handleProceed}
+                disabled={isUpdatingTask}
                 style={{
-                  background: "#4CAF0A",
+                  background: isUpdatingTask ? "#94a3b8" : "#4CAF0A",
                   color: "#fff",
                   border: "none",
                   borderRadius: 50,
                   padding: "14px 0",
                   fontSize: 15,
                   fontWeight: 700,
-                  cursor: "pointer",
+                  cursor: isUpdatingTask ? "not-allowed" : "pointer",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   gap: 10,
                   marginBottom: 14,
                   width: "35%",
+                  opacity: isUpdatingTask ? 0.7 : 1,
                 }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.background = "#3d9e08")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.background = "#4CAF0A")
-                }
+                onMouseEnter={(e) => {
+                  if (!isUpdatingTask) {
+                    e.currentTarget.style.background = "#3d9e08";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isUpdatingTask) {
+                    e.currentTarget.style.background = "#4CAF0A";
+                  }
+                }}
               >
-                Proceed to Continue <span style={{ fontSize: 17 }}>→</span>
+                {isUpdatingTask ? (
+                  <>
+                    <span style={{
+                      display: "inline-block",
+                      width: 16,
+                      height: 16,
+                      border: "2px solid rgba(255,255,255,0.3)",
+                      borderTop: "2px solid #fff",
+                      borderRadius: "50%",
+                      animation: "spin 0.7s linear infinite",
+                    }} />
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    Proceed to Continue <span style={{ fontSize: 17 }}>→</span>
+                  </>
+                )}
               </button>
 
               <div

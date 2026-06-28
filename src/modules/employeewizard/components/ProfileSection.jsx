@@ -3,7 +3,7 @@ import { User, Camera, X } from "lucide-react";
 import SummaryApi from "../../../common";
 import Taskupload from "../components/Taskupload";
 import VerificationProcess from "../components/Verificationprocess";
-import CommunicationAssessment from "../components/CommunicationAssessment"; // Add this import
+import CommunicationAssessment from "../components/CommunicationAssessment";
 import Logo from "../../../assets/images/logo1.png";
 
 const ROLES = [
@@ -25,288 +25,89 @@ const ROLES = [
 // Role-based skill suggestions
 const ROLE_SKILLS = {
   "Frontend Developer": [
-    "React",
-    "JavaScript",
-    "TypeScript",
-    "HTML",
-    "CSS",
-    "Next.js",
-    "Vue.js",
-    "Angular",
-    "Redux",
-    "Tailwind CSS",
-    "SASS",
-    "Webpack",
-    "Babel",
-    "Jest",
-    "Cypress",
-    "Storybook",
-    "GraphQL",
-    "REST API",
-    "Responsive Design",
+    "React", "JavaScript", "TypeScript", "HTML", "CSS", "Next.js", "Vue.js",
+    "Angular", "Redux", "Tailwind CSS", "SASS", "Webpack", "Babel", "Jest",
+    "Cypress", "Storybook", "GraphQL", "REST API", "Responsive Design",
   ],
   "Backend Developer": [
-    "Node.js",
-    "Python",
-    "Java",
-    "C#",
-    "PHP",
-    "Ruby",
-    "Go",
-    "Rust",
-    "Express.js",
-    "Django",
-    "Spring Boot",
-    "Laravel",
-    "Rails",
-    "PostgreSQL",
-    "MySQL",
-    "MongoDB",
-    "Redis",
-    "Kafka",
-    "RabbitMQ",
-    "REST API",
-    "GraphQL",
-    "Microservices",
-    "Docker",
-    "Kubernetes",
-    "AWS",
-    "Azure",
-    "GCP",
+    "Node.js", "Python", "Java", "C#", "PHP", "Ruby", "Go", "Rust",
+    "Express.js", "Django", "Spring Boot", "Laravel", "Rails",
+    "PostgreSQL", "MySQL", "MongoDB", "Redis", "Kafka", "RabbitMQ",
+    "REST API", "GraphQL", "Microservices", "Docker", "Kubernetes",
+    "AWS", "Azure", "GCP",
   ],
   "Full Stack Developer": [
-    "React",
-    "Node.js",
-    "JavaScript",
-    "TypeScript",
-    "Python",
-    "Java",
-    "C#",
-    "HTML",
-    "CSS",
-    "Next.js",
-    "Express.js",
-    "Spring Boot",
-    "Django",
-    "PostgreSQL",
-    "MySQL",
-    "MongoDB",
-    "REST API",
-    "GraphQL",
-    "Docker",
-    "AWS",
-    "Git",
-    "CI/CD",
-    "Microservices",
+    "React", "Node.js", "JavaScript", "TypeScript", "Python", "Java", "C#",
+    "HTML", "CSS", "Next.js", "Express.js", "Spring Boot", "Django",
+    "PostgreSQL", "MySQL", "MongoDB", "REST API", "GraphQL", "Docker",
+    "AWS", "Git", "CI/CD", "Microservices",
   ],
   "DevOps Engineer": [
-    "Docker",
-    "Kubernetes",
-    "AWS",
-    "Azure",
-    "GCP",
-    "Terraform",
-    "Ansible",
-    "Puppet",
-    "Chef",
-    "Jenkins",
-    "GitLab CI",
-    "GitHub Actions",
-    "CircleCI",
-    "Linux",
-    "Bash",
-    "Python",
-    "Go",
-    "Prometheus",
-    "Grafana",
-    "ELK Stack",
-    "Nginx",
-    "Apache",
-    "Networking",
-    "Security",
+    "Docker", "Kubernetes", "AWS", "Azure", "GCP", "Terraform", "Ansible",
+    "Puppet", "Chef", "Jenkins", "GitLab CI", "GitHub Actions", "CircleCI",
+    "Linux", "Bash", "Python", "Go", "Prometheus", "Grafana", "ELK Stack",
+    "Nginx", "Apache", "Networking", "Security",
   ],
   "Data Scientist": [
-    "Python",
-    "R",
-    "SQL",
-    "Machine Learning",
-    "Deep Learning",
-    "NLP",
-    "Computer Vision",
-    "TensorFlow",
-    "PyTorch",
-    "Scikit-learn",
-    "Pandas",
-    "NumPy",
-    "Jupyter",
-    "Tableau",
-    "Power BI",
-    "Hadoop",
-    "Spark",
-    "Kafka",
-    "AWS SageMaker",
-    "Data Visualization",
-    "Statistical Analysis",
+    "Python", "R", "SQL", "Machine Learning", "Deep Learning", "NLP",
+    "Computer Vision", "TensorFlow", "PyTorch", "Scikit-learn", "Pandas",
+    "NumPy", "Jupyter", "Tableau", "Power BI", "Hadoop", "Spark", "Kafka",
+    "AWS SageMaker", "Data Visualization", "Statistical Analysis",
   ],
   "Product Manager": [
-    "Agile",
-    "Scrum",
-    "JIRA",
-    "Confluence",
-    "Product Strategy",
-    "Roadmapping",
-    "User Research",
-    "Data Analysis",
-    "SQL",
-    "Figma",
-    "Wireframing",
-    "A/B Testing",
-    "Product Metrics",
-    "Communication",
-    "Leadership",
-    "Market Research",
-    "Competitive Analysis",
-    "Storytelling",
+    "Agile", "Scrum", "JIRA", "Confluence", "Product Strategy", "Roadmapping",
+    "User Research", "Data Analysis", "SQL", "Figma", "Wireframing",
+    "A/B Testing", "Product Metrics", "Communication", "Leadership",
+    "Market Research", "Competitive Analysis", "Storytelling",
   ],
   "Mobile Developer": [
-    "React Native",
-    "Flutter",
-    "Swift",
-    "Kotlin",
-    "Java",
-    "Objective-C",
-    "Android SDK",
-    "iOS SDK",
-    "Firebase",
-    "Redux",
-    "GraphQL",
-    "REST API",
-    "App Store Connect",
-    "Google Play Console",
-    "Git",
-    "CI/CD",
-    "Performance Optimization",
-    "Unit Testing",
+    "React Native", "Flutter", "Swift", "Kotlin", "Java", "Objective-C",
+    "Android SDK", "iOS SDK", "Firebase", "Redux", "GraphQL", "REST API",
+    "App Store Connect", "Google Play Console", "Git", "CI/CD",
+    "Performance Optimization", "Unit Testing",
   ],
   "UI/UX Designer": [
-    "Figma",
-    "Adobe XD",
-    "Sketch",
-    "InVision",
-    "Photoshop",
-    "Illustrator",
-    "Wireframing",
-    "Prototyping",
-    "User Research",
-    "Usability Testing",
-    "User Personas",
-    "Information Architecture",
-    "Interaction Design",
-    "Visual Design",
-    "Design Systems",
-    "Material Design",
-    "Responsive Design",
+    "Figma", "Adobe XD", "Sketch", "InVision", "Photoshop", "Illustrator",
+    "Wireframing", "Prototyping", "User Research", "Usability Testing",
+    "User Personas", "Information Architecture", "Interaction Design",
+    "Visual Design", "Design Systems", "Material Design", "Responsive Design",
   ],
   "Graphic Designer": [
-    "Photoshop",
-    "Illustrator",
-    "InDesign",
-    "CorelDRAW",
-    "Canva",
-    "Typography",
-    "Color Theory",
-    "Layout Design",
-    "Branding",
-    "Logo Design",
-    "Print Design",
-    "Packaging Design",
-    "Visual Communication",
-    "Adobe Suite",
-    "Figma",
-    "After Effects",
-    "Premiere Pro",
+    "Photoshop", "Illustrator", "InDesign", "CorelDRAW", "Canva",
+    "Typography", "Color Theory", "Layout Design", "Branding", "Logo Design",
+    "Print Design", "Packaging Design", "Visual Communication", "Adobe Suite",
+    "Figma", "After Effects", "Premiere Pro",
   ],
   "Product Designer": [
-    "Figma",
-    "Sketch",
-    "Adobe XD",
-    "User Research",
-    "Prototyping",
-    "UX Design",
-    "UI Design",
-    "Design Systems",
-    "User Testing",
-    "Wireframing",
-    "Information Architecture",
-    "Interaction Design",
-    "Visual Design",
-    "Product Strategy",
-    "Data Analysis",
-    "Collaboration",
+    "Figma", "Sketch", "Adobe XD", "User Research", "Prototyping",
+    "UX Design", "UI Design", "Design Systems", "User Testing",
+    "Wireframing", "Information Architecture", "Interaction Design",
+    "Visual Design", "Product Strategy", "Data Analysis", "Collaboration",
   ],
   "Video Editor": [
-    "Adobe Premiere Pro",
-    "Final Cut Pro",
-    "DaVinci Resolve",
-    "After Effects",
-    "Video Editing",
-    "Color Grading",
-    "Audio Editing",
-    "Motion Graphics",
-    "Visual Effects",
-    "Storytelling",
-    "Cinematography",
-    "Lighting",
-    "Sound Design",
-    "Media Encoder",
-    "Compression",
+    "Adobe Premiere Pro", "Final Cut Pro", "DaVinci Resolve", "After Effects",
+    "Video Editing", "Color Grading", "Audio Editing", "Motion Graphics",
+    "Visual Effects", "Storytelling", "Cinematography", "Lighting",
+    "Sound Design", "Media Encoder", "Compression",
   ],
   "Branding Designer": [
-    "Brand Strategy",
-    "Logo Design",
-    "Visual Identity",
-    "Typography",
-    "Color Theory",
-    "Photoshop",
-    "Illustrator",
-    "InDesign",
-    "Brand Guidelines",
-    "Packaging Design",
-    "Marketing Materials",
-    "Social Media Design",
-    "Figma",
-    "After Effects",
-    "Brand Storytelling",
+    "Brand Strategy", "Logo Design", "Visual Identity", "Typography",
+    "Color Theory", "Photoshop", "Illustrator", "InDesign", "Brand Guidelines",
+    "Packaging Design", "Marketing Materials", "Social Media Design",
+    "Figma", "After Effects", "Brand Storytelling",
   ],
   "Drawing Artist": [
-    "Digital Art",
-    "Illustration",
-    "Procreate",
-    "Photoshop",
-    "Sketching",
-    "Character Design",
-    "Concept Art",
-    "Comic Art",
-    "Manga",
-    "Painting",
-    "Color Theory",
-    "Anatomy",
-    "Visual Storytelling",
-    "Creativity",
-    "Adobe Illustrator",
-    "Concept Development",
+    "Digital Art", "Illustration", "Procreate", "Photoshop", "Sketching",
+    "Character Design", "Concept Art", "Comic Art", "Manga", "Painting",
+    "Color Theory", "Anatomy", "Visual Storytelling", "Creativity",
+    "Adobe Illustrator", "Concept Development",
   ],
 };
 
-// Roles that should see the Task Submission screen instead of the
-// standard Verification Process screen once verification starts.
+// Roles that should see the Task Submission screen
 const CREATIVE_ROLES = [
-  "UI/UX Designer",
-  "Graphic Designer",
-  "Product Designer",
-  "Video Editor",
-  "Branding Designer",
-  "Drawing Artist",
+  "UI/UX Designer", "Graphic Designer", "Product Designer",
+  "Video Editor", "Branding Designer", "Drawing Artist",
 ];
 
 const isCreativeRole = (role) => CREATIVE_ROLES.includes(role);
@@ -319,38 +120,19 @@ const EXPERIENCE = [
   { label: "5+ Years", value: "5+" },
 ];
 
-const NOTICE_PERIODS = [
-  "Immediate",
-  "2 weeks",
-  "1 month",
-  "2 months",
-  "3 months",
-];
+const NOTICE_PERIODS = ["Immediate", "2 weeks", "1 month", "2 months", "3 months"];
 const WORK_MODES = ["Remote", "On-site", "Hybrid"];
 
-// Define required fields
 const REQUIRED_FIELDS = [
-  "fullName",
-  "email",
-  "phone",
-  "role",
-  "skills",
-  "experience",
-  "noticePeriod",
-  "workMode",
+  "fullName", "email", "phone", "role", "skills", "experience",
+  "noticePeriod", "workMode",
 ];
 
 const FIELDS = [
-  "fullName",
-  "email",
-  "phone",
-  "role",
-  "skills",
-  "experience",
-  "company",
-  "noticePeriod",
-  "workMode",
+  "fullName", "email", "phone", "role", "skills", "experience",
+  "company", "noticePeriod", "workMode",
 ];
+
 const FIELD_LABELS = {
   fullName: "Full Name",
   email: "Email Address",
@@ -362,45 +144,21 @@ const FIELD_LABELS = {
   noticePeriod: "Notice Period",
   workMode: "Preferred Work Mode",
 };
+
 const VERIFICATION_STEPS = [
-  {
-    id: 1,
-    title: "Step 1: Skill Test",
-    desc: "Complete skill-based assessment",
-    icon: "📄",
-  },
-  {
-    id: 2,
-    title: "Step 2: Task Submission",
-    desc: "Upload practical assignment",
-    icon: "⏱",
-  },
-  {
-    id: 3,
-    title: "Step 3: Communication Test",
-    desc: "Assess communication skills",
-    icon: "💬",
-  },
+  { id: 1, title: "Step 1: Skill Test", desc: "Complete skill-based assessment", icon: "📄" },
+  { id: 2, title: "Step 2: Task Submission", desc: "Upload practical assignment", icon: "⏱" },
+  { id: 3, title: "Step 3: Communication Test", desc: "Assess communication skills", icon: "💬" },
 ];
+
 const EMPTY_FORM = {
-  fullName: "",
-  email: "",
-  phone: "",
-  role: "",
-  skills: "",
-  experience: "",
-  company: "",
-  noticePeriod: "",
-  workMode: "",
+  fullName: "", email: "", phone: "", role: "", skills: "",
+  experience: "", company: "", noticePeriod: "", workMode: "",
 };
 
 const isValidId = (val) =>
-  val !== null &&
-  val !== undefined &&
-  String(val).trim() !== "" &&
-  String(val).trim() !== "null" &&
-  String(val).trim() !== "undefined" &&
-  String(val).trim() !== "0";
+  val !== null && val !== undefined && String(val).trim() !== "" &&
+  String(val).trim() !== "null" && String(val).trim() !== "undefined" && String(val).trim() !== "0";
 
 const isFresher = (expValue) => expValue === "fresher";
 
@@ -445,15 +203,8 @@ const clearStoredEmployeeId = () => {
   } catch (e) {}
 };
 
-const callExperienceCreate = async (
-  employeeId,
-  yearsOfExperience,
-  companyName,
-) => {
-  console.group("📤 [EmployeeExperienceCreate]");
-
+const callExperienceCreate = async (employeeId, yearsOfExperience, companyName) => {
   const fresher = isFresher(yearsOfExperience);
-
   const payload = {
     employee_id: employeeId,
     company_name: fresher ? "N/A" : companyName || "",
@@ -468,25 +219,14 @@ const callExperienceCreate = async (
   });
 
   const result = await response.json();
-  console.log("Request Payload:", payload);
-  console.log("Response:", result);
-  console.groupEnd();
-
   if (!response.ok || !result.success) {
     throw new Error(result.message || "Experience create failed");
   }
   return result;
 };
 
-const callExperienceUpdate = async (
-  experienceId,
-  yearsOfExperience,
-  companyName,
-) => {
-  console.group("📤 [EmployeeExperienceUpdate]");
-
+const callExperienceUpdate = async (experienceId, yearsOfExperience, companyName) => {
   const fresher = isFresher(yearsOfExperience);
-
   const payload = {
     experience_id: experienceId,
     company_name: fresher ? "N/A" : companyName || "",
@@ -501,10 +241,6 @@ const callExperienceUpdate = async (
   });
 
   const result = await response.json();
-  console.log("Request:", payload);
-  console.log("Response:", result);
-  console.groupEnd();
-
   if (!response.ok || !result.success) {
     throw new Error(result.message || "Experience update failed");
   }
@@ -537,17 +273,11 @@ export default function JobProfileDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [profileImage, setProfileImage] = useState(() => {
-    try {
-      return sessionStorage.getItem("profile_image") || null;
-    } catch {
-      return null;
-    }
+    try { return sessionStorage.getItem("profile_image") || null; } catch { return null; }
   });
   const [verificationId, setVerificationId] = useState(() => {
     return sessionStorage.getItem("verification_id") || null;
   });
-  // Which post-verification screen to show in place of the dashboard:
-  // null | "taskupload" | "verification"
   const [postVerificationScreen, setPostVerificationScreen] = useState(() => {
     return sessionStorage.getItem("verification_screen") || null;
   });
@@ -557,66 +287,89 @@ export default function JobProfileDashboard() {
   const [skillSuggestions, setSkillSuggestions] = useState([]);
   const [selectedSkills, setSelectedSkills] = useState(() => {
     const currentSkills = form.skills || "";
-    return currentSkills
-      ? currentSkills
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean)
-      : [];
+    return currentSkills ? currentSkills.split(",").map((s) => s.trim()).filter(Boolean) : [];
   });
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
   const skillInputRef = useRef(null);
   const suggestionsRef = useRef(null);
 
+  // ─── API Function to save pending task ──────────────────────────────
+  const savePendingTask = async (wizardStep, verificationScreen = null, status = "pending") => {
+    try {
+      const employeeStr = sessionStorage.getItem("employee");
+      if (!employeeStr) {
+        console.warn("No employee data found");
+        return;
+      }
+
+      const employee = JSON.parse(employeeStr);
+      const employee_id = employee.employee_id || sessionStorage.getItem("employee_id");
+
+      if (!employee_id) {
+        console.warn("No employee_id found");
+        return;
+      }
+
+      const member_type_id = sessionStorage.getItem("member_type_id") || employee.member_type_id;
+
+      const payload = {
+        employee_id: employee_id,
+        member_type_id: member_type_id,
+        wizard_step: wizardStep,
+        verification_screen: verificationScreen,
+        status: status,
+      };
+
+      console.log("📤 Saving pending task:", payload);
+
+      const response = await fetch(SummaryApi.createorupdatependingtasks.url, {
+        method: SummaryApi.createorupdatependingtasks.method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+      console.log("✅ Pending task saved:", result);
+      return result;
+    } catch (err) {
+      console.error("❌ Error saving pending task:", err);
+    }
+  };
+
   // Update selectedSkills when form.skills changes
   useEffect(() => {
     const currentSkills = form.skills || "";
-    const skillsArray = currentSkills
-      ? currentSkills
-          .split(",")
-          .map((s) => s.trim())
-          .filter(Boolean)
-      : [];
+    const skillsArray = currentSkills ? currentSkills.split(",").map((s) => s.trim()).filter(Boolean) : [];
     setSelectedSkills(skillsArray);
   }, [form.skills]);
 
-  // Get skill suggestions based on selected role and input
   const getSkillSuggestions = (input, role) => {
     if (!input || input.trim() === "") {
       return ROLE_SKILLS[role] || [];
     }
-
     const inputLower = input.toLowerCase().trim();
     const roleSkills = ROLE_SKILLS[role] || [];
-
-    // Filter skills that match the input and are not already selected
     return roleSkills
-      .filter(
-        (skill) =>
-          skill.toLowerCase().includes(inputLower) &&
-          !selectedSkills.includes(skill),
-      )
+      .filter((skill) => skill.toLowerCase().includes(inputLower) && !selectedSkills.includes(skill))
       .slice(0, 8);
   };
 
-  // Handle skill input change
   const handleSkillInputChange = (e) => {
     const value = e.target.value;
     setSkillInput(value);
-
     const suggestions = getSkillSuggestions(value, form.role);
     setSkillSuggestions(suggestions);
     setShowSuggestions(suggestions.length > 0 && value.trim() !== "");
     setActiveSuggestionIndex(-1);
   };
 
-  // Add a skill
   const addSkill = (skill) => {
     if (!skill || skill.trim() === "") return;
     const trimmedSkill = skill.trim();
     if (selectedSkills.includes(trimmedSkill)) return;
-
     const newSkills = [...selectedSkills, trimmedSkill];
     setSelectedSkills(newSkills);
     setForm((prev) => ({ ...prev, skills: newSkills.join(", ") }));
@@ -627,22 +380,16 @@ export default function JobProfileDashboard() {
     skillInputRef.current?.focus();
   };
 
-  // Remove a skill
   const removeSkill = (skillToRemove) => {
     const newSkills = selectedSkills.filter((s) => s !== skillToRemove);
     setSelectedSkills(newSkills);
     setForm((prev) => ({ ...prev, skills: newSkills.join(", ") }));
   };
 
-  // Handle keydown in skill input
   const handleSkillKeyDown = (e) => {
-    // Enter key
     if (e.key === "Enter") {
       e.preventDefault();
-      if (
-        activeSuggestionIndex >= 0 &&
-        activeSuggestionIndex < skillSuggestions.length
-      ) {
+      if (activeSuggestionIndex >= 0 && activeSuggestionIndex < skillSuggestions.length) {
         addSkill(skillSuggestions[activeSuggestionIndex]);
         return;
       }
@@ -651,59 +398,39 @@ export default function JobProfileDashboard() {
         return;
       }
     }
-
-    // Arrow keys for navigation
     if (e.key === "ArrowDown") {
       e.preventDefault();
       if (showSuggestions && skillSuggestions.length > 0) {
-        setActiveSuggestionIndex((prev) =>
-          prev < skillSuggestions.length - 1 ? prev + 1 : prev,
-        );
+        setActiveSuggestionIndex((prev) => prev < skillSuggestions.length - 1 ? prev + 1 : prev);
       }
     }
-
     if (e.key === "ArrowUp") {
       e.preventDefault();
       if (showSuggestions && skillSuggestions.length > 0) {
         setActiveSuggestionIndex((prev) => (prev > 0 ? prev - 1 : -1));
       }
     }
-
-    // Escape key
     if (e.key === "Escape") {
       setShowSuggestions(false);
       setActiveSuggestionIndex(-1);
     }
-
-    // Backspace to remove last skill
-    if (
-      e.key === "Backspace" &&
-      skillInput === "" &&
-      selectedSkills.length > 0
-    ) {
+    if (e.key === "Backspace" && skillInput === "" && selectedSkills.length > 0) {
       removeSkill(selectedSkills[selectedSkills.length - 1]);
     }
   };
 
-  // Handle click outside to close suggestions
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (
-        skillInputRef.current &&
-        !skillInputRef.current.contains(e.target) &&
-        suggestionsRef.current &&
-        !suggestionsRef.current.contains(e.target)
-      ) {
+      if (skillInputRef.current && !skillInputRef.current.contains(e.target) &&
+          suggestionsRef.current && !suggestionsRef.current.contains(e.target)) {
         setShowSuggestions(false);
         setActiveSuggestionIndex(-1);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Handle role change - update skill suggestions
   useEffect(() => {
     if (form.role && skillInput) {
       const suggestions = getSkillSuggestions(skillInput, form.role);
@@ -753,83 +480,55 @@ export default function JobProfileDashboard() {
   useEffect(() => {
     const fetchProfile = async () => {
       const storedId = readStoredEmployeeId();
-
       if (!storedId) {
         setIsLoading(false);
         return;
       }
-
       setEmployeeId(storedId);
-
       try {
-        console.group("📥 [getEmployee] Fetching profile");
-        console.log("employee_id:", storedId);
-
         const response = await fetch(SummaryApi.getEmployee.url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ employee_id: storedId }),
         });
-
-        console.log("Status:", response.status);
         const result = await response.json();
-        console.log("Response:", result);
-        console.groupEnd();
-
         if (response.ok && result?.data) {
           const d = result.data;
-
           if (isValidId(d.employee_id)) {
             persistEmployeeId(d.employee_id);
             setEmployeeId(String(d.employee_id));
           }
-
           if (isValidId(d.member_id)) {
             setMemberId(d.member_id);
           }
-
           if (Array.isArray(d.experiences) && d.experiences.length > 0) {
             const firstExp = d.experiences[0];
             if (isValidId(firstExp?.experience_id)) {
               setExperienceId(String(firstExp.experience_id));
-              console.log(
-                "✅ experience_id loaded from GET:",
-                firstExp.experience_id,
-              );
             }
           }
-
           const exp = d.experiences?.[0] || {};
-
           const profile = {
             fullName: d.full_name || "",
             email: d.email || "",
             phone: d.phone || "",
             role: d.role || "",
             skills: d.skills || "",
-            experience: exp.years_of_experience
-              ? String(exp.years_of_experience)
-              : "",
+            experience: exp.years_of_experience ? String(exp.years_of_experience) : "",
             company: exp.company_name || "",
             noticePeriod: d.notice_period || "",
             workMode: d.preferred_work_mode || "",
           };
-
           setForm(profile);
           setSavedProfile(profile);
           setViewMode("profile");
-
-          // Load profile image if available
           if (d.profile_image) {
             const imageName = d.profile_image.replace("uploads/profiles/", "");
             const profileImageUrl = SummaryApi.getprofileimage.url + imageName;
             setProfileImage(profileImageUrl);
-            try {
-              sessionStorage.setItem("profile_image", profileImageUrl);
-            } catch {}
+            try { sessionStorage.setItem("profile_image", profileImageUrl); } catch {}
           }
         } else {
-          console.warn("No profile data returned; clearing stale id");
           clearStoredEmployeeId();
           setEmployeeId(null);
         }
@@ -839,7 +538,6 @@ export default function JobProfileDashboard() {
         setIsLoading(false);
       }
     };
-
     fetchProfile();
   }, []);
 
@@ -847,22 +545,18 @@ export default function JobProfileDashboard() {
     const handleStorageChange = () => {
       const screen = sessionStorage.getItem("verification_screen");
       const vId = sessionStorage.getItem("verification_id");
-
       if (vId) {
         setVerificationId(vId);
         sessionStorage.removeItem("verification_screen");
         setPostVerificationScreen(null);
         return;
       }
-
-      // Any valid screen value → update state immediately
       if (screen) {
         setPostVerificationScreen(screen);
       } else {
         setPostVerificationScreen(null);
       }
     };
-
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
@@ -875,56 +569,40 @@ export default function JobProfileDashboard() {
   const handleProfileImageChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     if (!file.type.startsWith("image/")) {
       showToast("Please select a valid image file.");
       e.target.value = "";
       return;
     }
-
     if (file.size > 2 * 1024 * 1024) {
       showToast("Image must be smaller than 2 MB.");
       e.target.value = "";
       return;
     }
-
-    // Check if employee_id exists
     const empId = employeeId || readStoredEmployeeId();
     if (!empId) {
       showToast("Please save your profile first before uploading an image.");
       e.target.value = "";
       return;
     }
-
     try {
-      // Upload image to server
       const formData = new FormData();
       formData.append("employee_id", empId);
       formData.append("profile_image", file);
-
-      const response = await fetch(
-        SummaryApi.profileimageupload.url,
-        {
-          method: SummaryApi.profileimageupload.method,
-          body: formData,
-        }
-      );
-
+      const response = await fetch(SummaryApi.profileimageupload.url, {
+        method: SummaryApi.profileimageupload.method,
+        body: formData,
+      });
       const result = await response.json();
-
       if (!response.ok || !result.success) {
         throw new Error(result.message || "Image upload failed");
       }
-
-      // Construct the image URL
       const imagePath = result.profile_image || result.data?.profile_image;
       if (imagePath) {
         const imageName = imagePath.replace("uploads/profiles/", "");
         const profileImageUrl = SummaryApi.getprofileimage.url + imageName;
         setProfileImage(profileImageUrl);
-        try {
-          sessionStorage.setItem("profile_image", profileImageUrl);
-        } catch {}
+        try { sessionStorage.setItem("profile_image", profileImageUrl); } catch {}
         showToast("Profile image updated successfully!");
       } else {
         throw new Error("Image path not returned from server");
@@ -933,7 +611,6 @@ export default function JobProfileDashboard() {
       console.error("Image upload failed:", error);
       showToast(error.message || "Failed to upload image. Please try again.");
     }
-
     e.target.value = "";
   };
 
@@ -942,14 +619,10 @@ export default function JobProfileDashboard() {
   const getProgress = () => {
     const profileToCheck = viewMode === "form" ? form : savedProfile;
     if (!profileToCheck) return 0;
-
     const fields = isFresher(profileToCheck.experience)
       ? FIELDS.filter((f) => f !== "company" && f !== "noticePeriod")
       : FIELDS;
-
-    const filledFields = fields.filter(
-      (f) => profileToCheck[f] && profileToCheck[f].trim() !== "",
-    ).length;
+    const filledFields = fields.filter((f) => profileToCheck[f] && profileToCheck[f].trim() !== "").length;
     return Math.round((filledFields / fields.length) * 100);
   };
 
@@ -958,7 +631,6 @@ export default function JobProfileDashboard() {
   const handleChange = (field, value) => {
     setForm((prev) => {
       const updated = { ...prev, [field]: value };
-      // When switching to fresher, clear company/notice period
       if (field === "experience" && isFresher(value)) {
         updated.company = "";
         updated.noticePeriod = "";
@@ -967,297 +639,279 @@ export default function JobProfileDashboard() {
     });
   };
 
-  // Enhanced validation for required fields
   const validateRequiredFields = () => {
     const missingFields = [];
-
     const fieldsToCheck = fresherSelected
       ? REQUIRED_FIELDS.filter((f) => f !== "noticePeriod")
       : REQUIRED_FIELDS;
-
     for (const field of fieldsToCheck) {
       const value = form[field];
       if (!value || (typeof value === "string" && value.trim() === "")) {
         missingFields.push(FIELD_LABELS[field]);
       }
     }
-
     if (missingFields.length > 0) {
-      showToast(
-        `Please fill in all required fields: ${missingFields.join(", ")}`,
-      );
+      showToast(`Please fill in all required fields: ${missingFields.join(", ")}`);
       return false;
     }
-
-    // Email validation
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       showToast("Please enter a valid email address");
       return false;
     }
-
-    // Additional validation for phone number (10 digits)
     if (form.phone && !/^\d{10}$/.test(form.phone)) {
       showToast("Please enter a valid 10-digit mobile number");
       return false;
     }
-
     return true;
   };
 
-  const handleSave = async () => {
-    // Validate all required fields before saving
-    if (!validateRequiredFields()) {
+// In your ProfileSection.jsx, update the handleSave function
+
+// In ProfileSection.jsx - Update the handleSave function
+
+const handleSave = async () => {
+  if (!validateRequiredFields()) {
+    return;
+  }
+
+  const isUpdate = isValidId(employeeId);
+  if (!isUpdate && !memberTypeId) {
+    showToast("Session error: member type not found. Please log in again.");
+    return;
+  }
+
+  const apiConfig = isUpdate ? SummaryApi.EmployeeUpdate : SummaryApi.EmployeeCreate;
+  setIsSaving(true);
+
+  try {
+    const noticePeriodValue = fresherSelected ? "N/A" : form.noticePeriod;
+    let payload;
+    if (isUpdate) {
+      payload = {
+        employee_id: Number(employeeId),
+        member_id: memberId,
+        email: form.email,
+        full_name: form.fullName,
+        notice_period: noticePeriodValue,
+        preferred_work_mode: form.workMode,
+      };
+    } else {
+      payload = {
+        member_type_id: memberTypeId,
+        email: form.email,
+        phone: form.phone,
+        full_name: form.fullName,
+        role: form.role,
+        skills: form.skills,
+        notice_period: noticePeriodValue,
+        preferred_work_mode: form.workMode,
+      };
+    }
+
+    console.log("📤 Saving profile with payload:", payload);
+
+    const response = await fetch(apiConfig.url, {
+      method: apiConfig.method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await response.json();
+    console.log("📥 Profile save response:", result);
+
+    // Handle errors
+    if (result.message && result.message.includes("Mobile number already exists")) {
+      showToast("Mobile number already exists. Please use a different number.");
+      setIsSaving(false);
+      return;
+    } else if (result.message && result.message.includes("Email already exists")) {
+      showToast("Email already exists. Please use a different email.");
+      setIsSaving(false);
+      return;
+    } else if (response.status === 409) {
+      showToast(result.message || "Conflict error. Please check your details.");
+      setIsSaving(false);
       return;
     }
 
-    const isUpdate = isValidId(employeeId);
-
-    if (!isUpdate && !memberTypeId) {
-      showToast("Session error: member type not found. Please log in again.");
-      return;
+    if (!response.ok) {
+      throw new Error(result.message || `Server error: ${response.status}`);
     }
 
-    const apiConfig = isUpdate
-      ? SummaryApi.EmployeeUpdate
-      : SummaryApi.EmployeeCreate;
+    let resolvedEmployeeId = employeeId;
 
-    console.log(
-      `🔀 handleSave → ${isUpdate ? "UPDATE" : "CREATE"} | employee_id: ${employeeId}`,
-    );
-
-    setIsSaving(true);
-
-    try {
-      const noticePeriodValue = fresherSelected ? "N/A" : form.noticePeriod;
-
-      let payload;
-
-      if (isUpdate) {
-        payload = {
-          employee_id: Number(employeeId),
-          member_id: memberId,
-          email: form.email,
-          full_name: form.fullName,
-          notice_period: noticePeriodValue,
-          preferred_work_mode: form.workMode,
-        };
+    if (!isUpdate) {
+      const newId = result?.data?.employee_id ?? result?.employee_id;
+      if (isValidId(newId)) {
+        persistEmployeeId(newId);
+        setEmployeeId(String(newId));
+        resolvedEmployeeId = String(newId);
       } else {
-        payload = {
-          member_type_id: memberTypeId,
-          email: form.email,
-          phone: form.phone,
-          full_name: form.fullName,
-          role: form.role,
-          skills: form.skills,
-          notice_period: noticePeriodValue,
-          preferred_work_mode: form.workMode,
-        };
+        throw new Error("Profile created but employee_id missing in response.");
       }
+    }
 
-      console.group(
-        `📤 [${isUpdate ? "EmployeeUpdate" : "EmployeeCreate"}] → ${apiConfig.url}`,
-      );
-      console.log("Payload:", payload);
-      console.groupEnd();
-
-      const response = await fetch(apiConfig.url, {
-        method: apiConfig.method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const result = await response.json();
-      console.log(
-        `📥 [${isUpdate ? "EmployeeUpdate" : "EmployeeCreate"}] Response:`,
-        result,
-      );
-
-      if (
-        result.message &&
-        result.message.includes("Mobile number already exists")
-      ) {
-        showToast(
-          "Mobile number already exists. Please use a different number.",
-        );
-        setIsSaving(false);
-        return;
-      } else if (
-        result.message &&
-        result.message.includes("Email already exists")
-      ) {
-        showToast("Email already exists. Please use a different email.");
-        setIsSaving(false);
-        return;
-      } else if (response.status === 409) {
-        showToast(
-          result.message || "Conflict error. Please check your details.",
-        );
-        setIsSaving(false);
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(result.message || `Server error: ${response.status}`);
-      }
-
-      let resolvedEmployeeId = employeeId;
-
-      if (!isUpdate) {
-        const newId = result?.data?.employee_id ?? result?.employee_id;
-        if (isValidId(newId)) {
-          persistEmployeeId(newId);
-          setEmployeeId(String(newId));
-          resolvedEmployeeId = String(newId);
-          console.log("✅ employee_id stored:", newId);
+    // Experience API call
+    if (form.experience && form.experience !== "") {
+      try {
+        if (!isUpdate) {
+          const expResult = await callExperienceCreate(resolvedEmployeeId, form.experience, form.company);
+          const newExpId = expResult?.data?.experience_id ?? expResult?.experience_id;
+          if (isValidId(newExpId)) {
+            setExperienceId(String(newExpId));
+          }
         } else {
-          console.warn("⚠️ CREATE response missing employee_id:", result);
-          throw new Error(
-            "Profile created but employee_id missing in response.",
-          );
-        }
-      }
-
-      // Experience API call
-      if (form.experience && form.experience !== "") {
-        try {
-          if (!isUpdate) {
-            console.log(
-              "🔀 [Experience] CREATE → callExperienceCreate, employee_id:",
-              resolvedEmployeeId,
-            );
-            const expResult = await callExperienceCreate(
-              resolvedEmployeeId,
-              form.experience,
-              form.company,
-            );
-            const newExpId =
-              expResult?.data?.experience_id ?? expResult?.experience_id;
+          if (isValidId(experienceId)) {
+            await callExperienceUpdate(experienceId, form.experience, form.company);
+          } else {
+            const expResult = await callExperienceCreate(resolvedEmployeeId, form.experience, form.company);
+            const newExpId = expResult?.data?.experience_id ?? expResult?.experience_id;
             if (isValidId(newExpId)) {
               setExperienceId(String(newExpId));
-              console.log("✅ experience_id stored:", newExpId);
-            }
-          } else {
-            if (isValidId(experienceId)) {
-              console.log(
-                "🔀 [Experience] UPDATE → callExperienceUpdate, experience_id:",
-                experienceId,
-              );
-              await callExperienceUpdate(
-                experienceId,
-                form.experience,
-                form.company,
-              );
-              console.log(
-                "✅ Experience updated for experience_id:",
-                experienceId,
-              );
-            } else {
-              console.warn(
-                "⚠️ No experience_id on update — creating new experience record",
-              );
-              const expResult = await callExperienceCreate(
-                resolvedEmployeeId,
-                form.experience,
-                form.company,
-              );
-              const newExpId =
-                expResult?.data?.experience_id ?? expResult?.experience_id;
-              if (isValidId(newExpId)) {
-                setExperienceId(String(newExpId));
-                console.log(
-                  "✅ experience_id stored (fallback create):",
-                  newExpId,
-                );
-              }
             }
           }
-        } catch (expError) {
-          console.error("⚠️ Experience API failed:", expError.message);
-          showToast(
-            "Profile saved, but experience record failed: " + expError.message,
-          );
-          setViewMode("profile");
-          return;
         }
+      } catch (expError) {
+        console.error("⚠️ Experience API failed:", expError.message);
+        showToast("Profile saved, but experience record failed: " + expError.message);
+        setViewMode("profile");
+        setIsSaving(false);
+        return;
       }
+    }
 
-      if (!isUpdate && isValidId(resolvedEmployeeId)) {
+    // ─── ✅ SAVE PENDING TASK - wizard_step = 1 (Profile completed) ───
+    const finalEmployeeId = resolvedEmployeeId || sessionStorage.getItem("employee_id");
+    
+    if (finalEmployeeId) {
+      try {
+        // Get member_type_id from session
+        let memberTypeIdForTask = null;
+        
         try {
-          console.log("📥 [getEmployee] Refreshing profile after create...");
-          const freshData = await fetchProfileById(resolvedEmployeeId);
-
-          if (isValidId(freshData.employee_id)) {
-            persistEmployeeId(freshData.employee_id);
-            setEmployeeId(String(freshData.employee_id));
+          const memberTypeRaw = sessionStorage.getItem("memberType");
+          if (memberTypeRaw) {
+            const memberTypeObj = JSON.parse(memberTypeRaw);
+            memberTypeIdForTask = memberTypeObj.member_type_id;
+            console.log("📋 Got member_type_id from memberType:", memberTypeIdForTask);
           }
-
-          if (isValidId(freshData.member_id)) {
-            setMemberId(freshData.member_id);
-          }
-
-          if (
-            Array.isArray(freshData.experiences) &&
-            freshData.experiences.length > 0
-          ) {
-            const firstExp = freshData.experiences[0];
-            if (isValidId(firstExp?.experience_id)) {
-              setExperienceId(String(firstExp.experience_id));
-              console.log(
-                "✅ experience_id refreshed from GET:",
-                firstExp.experience_id,
-              );
-            }
-          }
-
-          const exp = freshData.experiences?.[0] || {};
-          const freshProfile = {
-            fullName: freshData.full_name || "",
-            email: freshData.email || "",
-            phone: freshData.phone || "",
-            role: freshData.role || "",
-            skills: freshData.skills || "",
-            experience: exp.years_of_experience
-              ? String(exp.years_of_experience)
-              : "",
-            company: exp.company_name || "",
-            noticePeriod: freshData.notice_period || "",
-            workMode: freshData.preferred_work_mode || "",
-          };
-
-          setForm(freshProfile);
-          setSavedProfile(freshProfile);
-          console.log("✅ Profile state refreshed from GET");
-
-          // Load profile image if available
-          if (freshData.profile_image) {
-            const imageName = freshData.profile_image.replace("uploads/profiles/", "");
-            const profileImageUrl = SummaryApi.getprofileimage.url + imageName;
-            setProfileImage(profileImageUrl);
-            try {
-              sessionStorage.setItem("profile_image", profileImageUrl);
-            } catch {}
-          }
-        } catch (getErr) {
-          console.warn("⚠️ getEmployee after create failed:", getErr.message);
-          setSavedProfile({ ...form });
+        } catch (e) {
+          console.warn("Could not parse memberType from session:", e);
         }
-      } else if (isUpdate) {
+        
+        if (!memberTypeIdForTask) {
+          memberTypeIdForTask = sessionStorage.getItem("member_type_id");
+          console.log("📋 Got member_type_id from direct:", memberTypeIdForTask);
+        }
+        
+        if (!memberTypeIdForTask) {
+          memberTypeIdForTask = memberTypeId;
+          console.log("📋 Using member_type_id from state:", memberTypeIdForTask);
+        }
+        
+        if (!memberTypeIdForTask) {
+          memberTypeIdForTask = 2; // Default to Employee
+          console.log("📋 Using default member_type_id:", memberTypeIdForTask);
+        }
+        
+        // IMPORTANT: Pass a proper string for verification_screen, not null
+        // For wizard_step = 1 (Profile completed), verification_screen should be empty string or a specific value
+        const taskPayload = {
+          employee_id: String(finalEmployeeId),
+          member_type_id: String(memberTypeIdForTask),
+          wizard_step: 1,
+          verification_screen: "", // Empty string instead of null
+          status: "pending",
+        };
+
+        console.log("📤 Saving pending task with payload:", taskPayload);
+
+        const taskResponse = await fetch(SummaryApi.createorupdatependingtasks.url, {
+          method: SummaryApi.createorupdatependingtasks.method,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(taskPayload),
+        });
+
+        // Check if response is ok before parsing JSON
+        if (!taskResponse.ok) {
+          const errorText = await taskResponse.text();
+          console.warn("⚠️ Pending task API returned error:", taskResponse.status, errorText);
+          throw new Error(`API returned ${taskResponse.status}: ${errorText}`);
+        }
+
+        const taskResult = await taskResponse.json();
+        console.log("✅ Pending task response:", taskResult);
+        
+        if (taskResult.success) {
+          console.log("✅ Pending task saved successfully!");
+          sessionStorage.setItem("wizardStep", "1");
+          sessionStorage.setItem("pending_task_saved", "true");
+        } else {
+          console.warn("⚠️ Pending task API returned error:", taskResult.message);
+        }
+      } catch (taskError) {
+        console.error("❌ Error saving pending task:", taskError);
+        // Don't stop the flow - profile is already saved
+      }
+    } else {
+      console.warn("⚠️ No employee_id available to save pending task");
+    }
+
+    // Refresh profile data
+    if (!isUpdate && isValidId(resolvedEmployeeId)) {
+      try {
+        const freshData = await fetchProfileById(resolvedEmployeeId);
+        if (isValidId(freshData.employee_id)) {
+          persistEmployeeId(freshData.employee_id);
+          setEmployeeId(String(freshData.employee_id));
+        }
+        if (isValidId(freshData.member_id)) {
+          setMemberId(freshData.member_id);
+        }
+        if (Array.isArray(freshData.experiences) && freshData.experiences.length > 0) {
+          const firstExp = freshData.experiences[0];
+          if (isValidId(firstExp?.experience_id)) {
+            setExperienceId(String(firstExp.experience_id));
+          }
+        }
+        const exp = freshData.experiences?.[0] || {};
+        const freshProfile = {
+          fullName: freshData.full_name || "",
+          email: freshData.email || "",
+          phone: freshData.phone || "",
+          role: freshData.role || "",
+          skills: freshData.skills || "",
+          experience: exp.years_of_experience ? String(exp.years_of_experience) : "",
+          company: exp.company_name || "",
+          noticePeriod: freshData.notice_period || "",
+          workMode: freshData.preferred_work_mode || "",
+        };
+        setForm(freshProfile);
+        setSavedProfile(freshProfile);
+        if (freshData.profile_image) {
+          const imageName = freshData.profile_image.replace("uploads/profiles/", "");
+          const profileImageUrl = SummaryApi.getprofileimage.url + imageName;
+          setProfileImage(profileImageUrl);
+          try { sessionStorage.setItem("profile_image", profileImageUrl); } catch {}
+        }
+      } catch (getErr) {
         setSavedProfile({ ...form });
       }
-
-      setViewMode("profile");
-      showToast(
-        isUpdate
-          ? "Profile updated successfully ✓"
-          : "Profile created successfully ✓",
-      );
-    } catch (error) {
-      console.error("❌ Save FAILED:", error.message);
-      showToast(error.message || "Failed to save profile. Please try again.");
-    } finally {
-      setIsSaving(false);
+    } else if (isUpdate) {
+      setSavedProfile({ ...form });
     }
-  };
+
+    setViewMode("profile");
+    showToast(isUpdate ? "Profile updated successfully ✓" : "Profile created successfully ✓");
+  } catch (error) {
+    console.error("❌ Save FAILED:", error.message);
+    showToast(error.message || "Failed to save profile. Please try again.");
+  } finally {
+    setIsSaving(false);
+  }
+};
 
   const handleDeleteProfile = async () => {
     try {
@@ -1270,16 +924,13 @@ export default function JobProfileDashboard() {
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.message || "Delete failed");
-
       clearStoredEmployeeId();
       setForm({ ...EMPTY_FORM });
       setSavedProfile(null);
       setEmployeeId(null);
       setExperienceId(null);
       setProfileImage(null);
-      try {
-        sessionStorage.removeItem("profile_image");
-      } catch {}
+      try { sessionStorage.removeItem("profile_image"); } catch {}
       setViewMode("form");
       setVerificationStarted(false);
       setShowDeleteConfirm(false);
@@ -1295,43 +946,17 @@ export default function JobProfileDashboard() {
 
   if (isLoading) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontFamily: "'DM Sans', sans-serif",
-          background: "#f2f5f1",
-          flexDirection: "column",
-          gap: 14,
-        }}
-      >
-        <svg
-          width="36"
-          height="36"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#4CAF0A"
-          strokeWidth="2.2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          style={{ animation: "spin 0.8s linear infinite" }}
-        >
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'DM Sans', sans-serif", background: "#f2f5f1", flexDirection: "column", gap: 14 }}>
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#4CAF0A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: "spin 0.8s linear infinite" }}>
           <path d="M21 12a9 9 0 1 1-6.219-8.56" />
         </svg>
         <style>{`@keyframes spin { to { transform:rotate(360deg); } }`}</style>
-        <p style={{ color: "#7a8a7a", fontSize: 14 }}>
-          Loading your profile...
-        </p>
+        <p style={{ color: "#7a8a7a", fontSize: 14 }}>Loading your profile...</p>
       </div>
     );
   }
 
-  // Role-based screen swap once verification has been started.
-  // Creative roles (UI/UX, Graphic/Product/Branding Designer, Video
-  // Editor, Drawing Artist) see the Task Submission screen; every
-  // other role sees the standard Verification Process screen.
+  // Role-based screen swap
   if (postVerificationScreen === "taskupload") {
     return (
       <Taskupload
@@ -1357,7 +982,7 @@ export default function JobProfileDashboard() {
       />
     );
   }
-  // Add this alongside your existing postVerificationScreen checks
+
   if (postVerificationScreen === "communication") {
     return (
       <CommunicationAssessment
@@ -1377,7 +1002,7 @@ export default function JobProfileDashboard() {
       />
     );
   }
-  // Check if skills input should be disabled
+
   const isSkillsDisabled = !form.role || isValidId(employeeId);
 
   return (
@@ -1470,148 +1095,35 @@ export default function JobProfileDashboard() {
           .jpd-card{padding:1.2rem}
           .jpd-logo{height:38px}
         }
-
-        /* Skills autocomplete styles */
-        .jpd-skills-container {
-          position: relative;
-          width: 100%;
-        }
-        .jpd-skills-tags {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 6px;
-          padding: 6px;
-          border: 1.5px solid #dde5dd;
-          border-radius: 9px;
-          background: #fafcfa;
-          min-height: 44px;
-          align-items: center;
-          cursor: text;
-          transition: border-color .15s, box-shadow .15s;
-        }
-        .jpd-skills-tags:focus-within {
-          border-color: #4CAF0A;
-          box-shadow: 0 0 0 3px rgba(76,175,10,.12);
-          background: #fff;
-        }
-        .jpd-skills-tags.disabled {
-          background: #f5f5f5;
-          cursor: not-allowed;
-          opacity: 0.8;
-        }
-        .jpd-skills-tags.disabled:focus-within {
-          border-color: #dde5dd;
-          box-shadow: none;
-        }
-        .jpd-skill-tag {
-          display: inline-flex;
-          align-items: center;
-          gap: 4px;
-          background: #eafaf0;
-          color: #1a1f1a;
-          padding: 4px 8px 4px 10px;
-          border-radius: 6px;
-          font-size: 13px;
-          font-weight: 500;
-          border: 1px solid #b0d4b8;
-        }
-        .jpd-skill-tag button {
-          background: none;
-          border: none;
-          cursor: pointer;
-          padding: 0;
-          display: flex;
-          align-items: center;
-          color: #5a6a5a;
-          transition: color .15s;
-        }
-        .jpd-skill-tag button:hover:not(:disabled) {
-          color: #e24b4a;
-        }
-        .jpd-skill-tag button:disabled {
-          cursor: not-allowed;
-          opacity: 0.5;
-        }
-        .jpd-skill-input {
-          border: none;
-          outline: none;
-          padding: 6px 4px;
-          font-size: 14px;
-          font-family: 'DM Sans', sans-serif;
-          background: transparent;
-          color: #1a1f1a;
-          flex: 1;
-          min-width: 120px;
-        }
-        .jpd-skill-input::placeholder {
-          color: #b8c8b8;
-        }
-        .jpd-skill-input:disabled {
-          cursor: not-allowed;
-          opacity: 0.6;
-        }
-        .jpd-skills-suggestions {
-          position: absolute;
-          top: calc(100% + 4px);
-          left: 0;
-          right: 0;
-          background: #fff;
-          border: 1.5px solid #dde5dd;
-          border-radius: 9px;
-          box-shadow: 0 4px 12px rgba(0,0,0,.08);
-          max-height: 200px;
-          overflow-y: auto;
-          z-index: 1000;
-          display: none;
-        }
-        .jpd-skills-suggestions.show {
-          display: block;
-        }
-        .jpd-skill-suggestion {
-          padding: 8px 14px;
-          cursor: pointer;
-          font-size: 13px;
-          color: #1a1f1a;
-          transition: background .1s;
-        }
-        .jpd-skill-suggestion:hover,
-        .jpd-skill-suggestion.active {
-          background: #f0f7f0;
-        }
-        .jpd-skill-suggestion mark {
-          background: #d4e8d4;
-          font-weight: 600;
-        }
-        .jpd-skills-empty {
-          padding: 10px 14px;
-          font-size: 13px;
-          color: #9aaa9a;
-        }
-        .jpd-skill-char-count {
-          font-size: 12px;
-          color: #9aaa9a;
-          margin-top: 4px;
-          text-align: right;
-        }
-        .jpd-skill-char-count .limit-reached {
-          color: #e24b4a;
-        }
-        .jpd-skill-warning {
-          font-size: 12px;
-          color: #d4a017;
-          margin-top: 4px;
-        }
+        .jpd-skills-container{position:relative;width:100%}
+        .jpd-skills-tags{display:flex;flex-wrap:wrap;gap:6px;padding:6px;border:1.5px solid #dde5dd;border-radius:9px;background:#fafcfa;min-height:44px;align-items:center;cursor:text;transition:border-color .15s,box-shadow .15s}
+        .jpd-skills-tags:focus-within{border-color:#4CAF0A;box-shadow:0 0 0 3px rgba(76,175,10,.12);background:#fff}
+        .jpd-skills-tags.disabled{background:#f5f5f5;cursor:not-allowed;opacity:0.8}
+        .jpd-skills-tags.disabled:focus-within{border-color:#dde5dd;box-shadow:none}
+        .jpd-skill-tag{display:inline-flex;align-items:center;gap:4px;background:#eafaf0;color:#1a1f1a;padding:4px 8px 4px 10px;border-radius:6px;font-size:13px;font-weight:500;border:1px solid #b0d4b8}
+        .jpd-skill-tag button{background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;color:#5a6a5a;transition:color .15s}
+        .jpd-skill-tag button:hover:not(:disabled){color:#e24b4a}
+        .jpd-skill-tag button:disabled{cursor:not-allowed;opacity:0.5}
+        .jpd-skill-input{border:none;outline:none;padding:6px 4px;font-size:14px;font-family:'DM Sans',sans-serif;background:transparent;color:#1a1f1a;flex:1;min-width:120px}
+        .jpd-skill-input::placeholder{color:#b8c8b8}
+        .jpd-skill-input:disabled{cursor:not-allowed;opacity:0.6}
+        .jpd-skills-suggestions{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1.5px solid #dde5dd;border-radius:9px;box-shadow:0 4px 12px rgba(0,0,0,.08);max-height:200px;overflow-y:auto;z-index:1000;display:none}
+        .jpd-skills-suggestions.show{display:block}
+        .jpd-skill-suggestion{padding:8px 14px;cursor:pointer;font-size:13px;color:#1a1f1a;transition:background .1s}
+        .jpd-skill-suggestion:hover,.jpd-skill-suggestion.active{background:#f0f7f0}
+        .jpd-skill-suggestion mark{background:#d4e8d4;font-weight:600}
+        .jpd-skills-empty{padding:10px 14px;font-size:13px;color:#9aaa9a}
+        .jpd-skill-char-count{font-size:12px;color:#9aaa9a;margin-top:4px;text-align:right}
+        .jpd-skill-char-count .limit-reached{color:#e24b4a}
+        .jpd-skill-warning{font-size:12px;color:#d4a017;margin-top:4px}
       `}</style>
 
       <div className="jpd-root">
         <div className="jpd-topbar" />
-
         <div className="jpd-hdr">
           <img src={Logo} alt="Logo" className="jpd-logo" />
           <h1>Welcome back!</h1>
-          <p>
-            Complete your profile and get verified to start receiving job offers
-          </p>
+          <p>Complete your profile and get verified to start receiving job offers</p>
         </div>
 
         <div className="jpd-wrap">
@@ -1631,490 +1143,151 @@ export default function JobProfileDashboard() {
           <div className="jpd-grid">
             <div className="jpd-card">
               <div className="jpd-card-head">
-                <h2>
-                  {viewMode === "form"
-                    ? isValidId(employeeId)
-                      ? "Edit Profile"
-                      : "Create Your Profile"
-                    : "Your Profile"}
-                </h2>
+                <h2>{viewMode === "form" ? (isValidId(employeeId) ? "Edit Profile" : "Create Your Profile") : "Your Profile"}</h2>
                 <label className="jpd-avatar-wrap">
-                  <div
-                    className="jpd-avatar"
-                    title="Click to upload profile picture"
-                  >
-                    {profileImage ? (
-                      <img src={profileImage} alt="Profile" />
-                    ) : (
-                      <User size={22} strokeWidth={2} />
-                    )}
+                  <div className="jpd-avatar" title="Click to upload profile picture">
+                    {profileImage ? <img src={profileImage} alt="Profile" /> : <User size={22} strokeWidth={2} />}
                   </div>
-                  <span className="jpd-avatar-cam">
-                    <Camera size={11} strokeWidth={2.3} />
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="jpd-avatar-input"
-                    onChange={handleProfileImageChange}
-                  />
+                  <span className="jpd-avatar-cam"><Camera size={11} strokeWidth={2.3} /></span>
+                  <input type="file" accept="image/*" className="jpd-avatar-input" onChange={handleProfileImageChange} />
                 </label>
               </div>
-
 
               {viewMode === "form" ? (
                 <>
                   <div className="jpd-row">
                     <div className="jpd-field">
-                      <label>
-                        Full Name <span className="required-star">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="John Doe"
-                        value={form.fullName}
-                        onChange={(e) =>
-                          handleChange("fullName", e.target.value)
-                        }
-                      />
+                      <label>Full Name <span className="required-star">*</span></label>
+                      <input type="text" placeholder="John Doe" value={form.fullName} onChange={(e) => handleChange("fullName", e.target.value)} />
                     </div>
                     <div className="jpd-field">
-                      <label>
-                        Email Address <span className="required-star">*</span>
-                      </label>
-                      <input
-                        type="email"
-                        placeholder="john@example.com"
-                        value={form.email}
-                        onChange={(e) => handleChange("email", e.target.value)}
-                      />
+                      <label>Email Address <span className="required-star">*</span></label>
+                      <input type="email" placeholder="john@example.com" value={form.email} onChange={(e) => handleChange("email", e.target.value)} />
                     </div>
                   </div>
 
                   <div className="jpd-row">
                     <div className="jpd-field">
-                      <label>
-                        Mobile Number <span className="required-star">*</span>
-                      </label>
-                      <input
-                        type="tel"
-                        placeholder="9876543210"
-                        value={form.phone}
-                        maxLength={10}
-                        disabled={isValidId(employeeId)}
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/\D/g, "");
-                          if (value.length <= 10) {
-                            handleChange("phone", value);
-                          }
-                        }}
-                        style={{
-                          background: isValidId(employeeId)
-                            ? "#f5f5f5"
-                            : "#fff",
-                          cursor: isValidId(employeeId)
-                            ? "not-allowed"
-                            : "text",
-                          opacity: isValidId(employeeId) ? 0.8 : 1,
-                        }}
-                      />
-                      {isValidId(employeeId) && (
-                        <small style={{ color: "#7a8a7a", marginTop: "4px" }}>
-                          Mobile number cannot be changed after profile
-                          creation.
-                        </small>
-                      )}
+                      <label>Mobile Number <span className="required-star">*</span></label>
+                      <input type="tel" placeholder="9876543210" value={form.phone} maxLength={10} disabled={isValidId(employeeId)} onChange={(e) => { const value = e.target.value.replace(/\D/g, ""); if (value.length <= 10) handleChange("phone", value); }} style={{ background: isValidId(employeeId) ? "#f5f5f5" : "#fff", cursor: isValidId(employeeId) ? "not-allowed" : "text", opacity: isValidId(employeeId) ? 0.8 : 1 }} />
+                      {isValidId(employeeId) && <small style={{ color: "#7a8a7a", marginTop: "4px" }}>Mobile number cannot be changed after profile creation.</small>}
                     </div>
                     <div className="jpd-field">
-                      <label>
-                        Primary Role <span className="required-star">*</span>
-                      </label>
-                      <select
-                        value={form.role}
-                        onChange={(e) => handleChange("role", e.target.value)}
-                        disabled={isValidId(employeeId)}
-                        style={{
-                          background: isValidId(employeeId)
-                            ? "#f5f5f5"
-                            : "#fafcfa",
-                          cursor: isValidId(employeeId)
-                            ? "not-allowed"
-                            : "pointer",
-                          opacity: isValidId(employeeId) ? 0.8 : 1,
-                        }}
-                      >
+                      <label>Primary Role <span className="required-star">*</span></label>
+                      <select value={form.role} onChange={(e) => handleChange("role", e.target.value)} disabled={isValidId(employeeId)} style={{ background: isValidId(employeeId) ? "#f5f5f5" : "#fafcfa", cursor: isValidId(employeeId) ? "not-allowed" : "pointer", opacity: isValidId(employeeId) ? 0.8 : 1 }}>
                         <option value="">Select your role</option>
-                        {ROLES.map((r) => (
-                          <option key={r} value={r}>
-                            {r}
-                          </option>
-                        ))}
+                        {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
                       </select>
-                      {isValidId(employeeId) && (
-                        <small style={{ color: "#7a8a7a", marginTop: "4px" }}>
-                          Primary role cannot be changed after profile creation.
-                        </small>
-                      )}
+                      {isValidId(employeeId) && <small style={{ color: "#7a8a7a", marginTop: "4px" }}>Primary role cannot be changed after profile creation.</small>}
                     </div>
                   </div>
 
-                  {/* Skills field with autocomplete - Disabled until role is selected */}
                   <div className="jpd-field">
-                    <label>
-                      Skills <span className="required-star">*</span>
-                    </label>
+                    <label>Skills <span className="required-star">*</span></label>
                     <div className="jpd-skills-container">
-                      <div
-                        className={`jpd-skills-tags${isSkillsDisabled ? " disabled" : ""}`}
-                        onClick={() => {
-                          if (!isSkillsDisabled) {
-                            skillInputRef.current?.focus();
-                          }
-                        }}
-                      >
+                      <div className={`jpd-skills-tags${isSkillsDisabled ? " disabled" : ""}`} onClick={() => { if (!isSkillsDisabled) skillInputRef.current?.focus(); }}>
                         {selectedSkills.map((skill) => (
                           <span key={skill} className="jpd-skill-tag">
                             {skill}
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (!isValidId(employeeId)) {
-                                  removeSkill(skill);
-                                }
-                              }}
-                              disabled={isValidId(employeeId)}
-                            >
-                              <X size={14} />
-                            </button>
+                            <button type="button" onClick={(e) => { e.stopPropagation(); if (!isValidId(employeeId)) removeSkill(skill); }} disabled={isValidId(employeeId)}><X size={14} /></button>
                           </span>
                         ))}
-                        <input
-                          ref={skillInputRef}
-                          type="text"
-                          className="jpd-skill-input"
-                          placeholder={
-                            isSkillsDisabled
-                              ? !form.role
-                                ? "Please select a role first"
-                                : "Skills cannot be changed after profile creation"
-                              : selectedSkills.length === 0
-                                ? "Type a skill and press Enter..."
-                                : ""
-                          }
-                          value={skillInput}
-                          onChange={handleSkillInputChange}
-                          onKeyDown={handleSkillKeyDown}
-                          onFocus={() => {
-                            if (
-                              !isSkillsDisabled &&
-                              skillInput.trim() &&
-                              form.role
-                            ) {
-                              const suggestions = getSkillSuggestions(
-                                skillInput,
-                                form.role,
-                              );
-                              setSkillSuggestions(suggestions);
-                              setShowSuggestions(suggestions.length > 0);
-                            }
-                          }}
-                          disabled={isSkillsDisabled}
-                        />
+                        <input ref={skillInputRef} type="text" className="jpd-skill-input" placeholder={isSkillsDisabled ? (!form.role ? "Please select a role first" : "Skills cannot be changed after profile creation") : (selectedSkills.length === 0 ? "Type a skill and press Enter..." : "")} value={skillInput} onChange={handleSkillInputChange} onKeyDown={handleSkillKeyDown} onFocus={() => { if (!isSkillsDisabled && skillInput.trim() && form.role) { const suggestions = getSkillSuggestions(skillInput, form.role); setSkillSuggestions(suggestions); setShowSuggestions(suggestions.length > 0); } }} disabled={isSkillsDisabled} />
                       </div>
-
-                      {/* Suggestions dropdown */}
                       {!isSkillsDisabled && (
-                        <div
-                          ref={suggestionsRef}
-                          className={`jpd-skills-suggestions${showSuggestions ? " show" : ""}`}
-                        >
-                          {skillSuggestions.length > 0
-                            ? skillSuggestions.map((skill, index) => (
-                                <div
-                                  key={skill}
-                                  className={`jpd-skill-suggestion${index === activeSuggestionIndex ? " active" : ""}`}
-                                  onClick={() => addSkill(skill)}
-                                  onMouseEnter={() =>
-                                    setActiveSuggestionIndex(index)
-                                  }
-                                >
-                                  {skill}
-                                </div>
-                              ))
-                            : skillInput.trim() && (
-                                <div className="jpd-skills-empty">
-                                  No matching skills found. Press Enter to add "
-                                  {skillInput}"
-                                </div>
-                              )}
+                        <div ref={suggestionsRef} className={`jpd-skills-suggestions${showSuggestions ? " show" : ""}`}>
+                          {skillSuggestions.length > 0 ? skillSuggestions.map((skill, index) => (
+                            <div key={skill} className={`jpd-skill-suggestion${index === activeSuggestionIndex ? " active" : ""}`} onClick={() => addSkill(skill)} onMouseEnter={() => setActiveSuggestionIndex(index)}>{skill}</div>
+                          )) : skillInput.trim() && <div className="jpd-skills-empty">No matching skills found. Press Enter to add "{skillInput}"</div>}
                         </div>
                       )}
                     </div>
-
-                    {isSkillsDisabled &&
-                      !form.role &&
-                      !isValidId(employeeId) && (
-                        <div className="jpd-skill-warning">
-                          ⚠️ Please select a Primary Role first to add skills
-                        </div>
-                      )}
-
-                    {form.role &&
-                      !isValidId(employeeId) &&
-                      !isSkillsDisabled && (
-                        <small style={{ color: "#7a8a7a", marginTop: "4px" }}>
-                          Type to see skill suggestions for {form.role}
-                        </small>
-                      )}
-
-                    {isValidId(employeeId) && (
-                      <small style={{ color: "#7a8a7a", marginTop: "4px" }}>
-                        Skills cannot be changed after profile creation.
-                      </small>
-                    )}
-
-                    {selectedSkills.length > 0 && !isValidId(employeeId) && (
-                      <div className="jpd-skill-char-count">
-                        {selectedSkills.length} skill
-                        {selectedSkills.length > 1 ? "s" : ""} added
-                      </div>
-                    )}
+                    {isSkillsDisabled && !form.role && !isValidId(employeeId) && <div className="jpd-skill-warning">⚠️ Please select a Primary Role first to add skills</div>}
+                    {form.role && !isValidId(employeeId) && !isSkillsDisabled && <small style={{ color: "#7a8a7a", marginTop: "4px" }}>Type to see skill suggestions for {form.role}</small>}
+                    {isValidId(employeeId) && <small style={{ color: "#7a8a7a", marginTop: "4px" }}>Skills cannot be changed after profile creation.</small>}
+                    {selectedSkills.length > 0 && !isValidId(employeeId) && <div className="jpd-skill-char-count">{selectedSkills.length} skill{selectedSkills.length > 1 ? "s" : ""} added</div>}
                   </div>
 
-                  {/* Years of Experience and Preferred Work Mode - Always in one row */}
                   <div className="jpd-row">
                     <div className="jpd-field">
-                      <label>
-                        Years of Experience{" "}
-                        <span className="required-star">*</span>
-                      </label>
-                      <select
-                        value={form.experience}
-                        onChange={(e) =>
-                          handleChange("experience", e.target.value)
-                        }
-                        disabled={isValidId(employeeId)}
-                        style={{
-                          background: isValidId(employeeId)
-                            ? "#f5f5f5"
-                            : "#fafcfa",
-                          cursor: isValidId(employeeId)
-                            ? "not-allowed"
-                            : "pointer",
-                          opacity: isValidId(employeeId) ? 0.8 : 1,
-                        }}
-                      >
+                      <label>Years of Experience <span className="required-star">*</span></label>
+                      <select value={form.experience} onChange={(e) => handleChange("experience", e.target.value)} disabled={isValidId(employeeId)} style={{ background: isValidId(employeeId) ? "#f5f5f5" : "#fafcfa", cursor: isValidId(employeeId) ? "not-allowed" : "pointer", opacity: isValidId(employeeId) ? 0.8 : 1 }}>
                         <option value="">Select experience</option>
-                        {EXPERIENCE.map((x) => (
-                          <option key={x.value} value={x.value}>
-                            {x.label}
-                          </option>
-                        ))}
+                        {EXPERIENCE.map((x) => <option key={x.value} value={x.value}>{x.label}</option>)}
                       </select>
-                      {isValidId(employeeId) && (
-                        <small style={{ color: "#7a8a7a", marginTop: "4px" }}>
-                          Years of experience cannot be changed after profile
-                          creation.
-                        </small>
-                      )}
+                      {isValidId(employeeId) && <small style={{ color: "#7a8a7a", marginTop: "4px" }}>Years of experience cannot be changed after profile creation.</small>}
                     </div>
                     <div className="jpd-field">
-                      <label>
-                        Preferred Work Mode{" "}
-                        <span className="required-star">*</span>
-                      </label>
-                      <select
-                        value={form.workMode}
-                        onChange={(e) =>
-                          handleChange("workMode", e.target.value)
-                        }
-                      >
+                      <label>Preferred Work Mode <span className="required-star">*</span></label>
+                      <select value={form.workMode} onChange={(e) => handleChange("workMode", e.target.value)}>
                         <option value="">Select work mode</option>
-                        {WORK_MODES.map((w) => (
-                          <option key={w} value={w}>
-                            {w}
-                          </option>
-                        ))}
+                        {WORK_MODES.map((w) => <option key={w} value={w}>{w}</option>)}
                       </select>
                     </div>
                   </div>
 
-                  {/* Previous Company - Only shown for Non-Fresher */}
                   {!fresherSelected && (
                     <div className="jpd-field">
-                      <label>
-                        Previous Company{" "}
-                        <span className="required-star">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Tech Corp Inc."
-                        value={form.company}
-                        onChange={(e) =>
-                          handleChange("company", e.target.value)
-                        }
-                      />
+                      <label>Previous Company <span className="required-star">*</span></label>
+                      <input type="text" placeholder="Tech Corp Inc." value={form.company} onChange={(e) => handleChange("company", e.target.value)} />
                     </div>
                   )}
 
-                  {/* Notice Period - Only shown for Non-Fresher */}
                   {!fresherSelected && (
                     <div className="jpd-field">
-                      <label>
-                        Notice Period <span className="required-star">*</span>
-                      </label>
-                      <select
-                        value={form.noticePeriod}
-                        onChange={(e) =>
-                          handleChange("noticePeriod", e.target.value)
-                        }
-                      >
+                      <label>Notice Period <span className="required-star">*</span></label>
+                      <select value={form.noticePeriod} onChange={(e) => handleChange("noticePeriod", e.target.value)}>
                         <option value="">Select notice period</option>
-                        {NOTICE_PERIODS.map((n) => (
-                          <option key={n} value={n}>
-                            {n}
-                          </option>
-                        ))}
+                        {NOTICE_PERIODS.map((n) => <option key={n} value={n}>{n}</option>)}
                       </select>
                     </div>
                   )}
 
                   <div className="jpd-btn-row">
-                    <button
-                      className="jpd-btn-green"
-                      onClick={handleSave}
-                      disabled={isSaving}
-                      style={{
-                        opacity: isSaving ? 0.75 : 1,
-                        cursor: isSaving ? "not-allowed" : "pointer",
-                      }}
-                    >
+                    <button className="jpd-btn-green" onClick={handleSave} disabled={isSaving} style={{ opacity: isSaving ? 0.75 : 1, cursor: isSaving ? "not-allowed" : "pointer" }}>
                       {isSaving ? (
                         <>
-                          <svg
-                            width="15"
-                            height="15"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2.2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            style={{
-                              animation: "jpd-spin 0.8s linear infinite",
-                            }}
-                          >
-                            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-                          </svg>
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: "jpd-spin 0.8s linear infinite" }}><path d="M21 12a9 9 0 1 1-6.219-8.56" /></svg>
                           Saving...
                         </>
                       ) : (
                         <>
-                          <svg
-                            width="15"
-                            height="15"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2.2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                            <polyline points="17 21 17 13 7 13 7 21" />
-                            <polyline points="7 3 7 8 15 8" />
-                          </svg>
-                          {isValidId(employeeId)
-                            ? "Update Profile"
-                            : "Save Profile"}
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>
+                          {isValidId(employeeId) ? "Update Profile" : "Save Profile"}
                         </>
                       )}
                     </button>
-                    {savedProfile && (
-                      <button
-                        className="jpd-btn-outline"
-                        onClick={() => setViewMode("profile")}
-                      >
-                        Cancel
-                      </button>
-                    )}
+                    {savedProfile && <button className="jpd-btn-outline" onClick={() => setViewMode("profile")}>Cancel</button>}
                   </div>
                 </>
               ) : (
                 <>
                   {FIELDS.filter((f) => {
-                    if (isFresher(savedProfile?.experience)) {
-                      return f !== "company" && f !== "noticePeriod";
-                    }
+                    if (isFresher(savedProfile?.experience)) return f !== "company" && f !== "noticePeriod";
                     return true;
                   }).map((f) => (
                     <div className="jpd-pv-row" key={f}>
                       <span className="jpd-pv-label">
-                        {f === "experience"
-                          ? EXPERIENCE.find(
-                              (x) => x.value === savedProfile?.[f],
-                            )?.label || FIELD_LABELS[f]
-                          : FIELD_LABELS[f]}
-                        {REQUIRED_FIELDS.includes(f) && (
-                          <span className="required-star">*</span>
-                        )}
+                        {f === "experience" ? EXPERIENCE.find((x) => x.value === savedProfile?.[f])?.label || FIELD_LABELS[f] : FIELD_LABELS[f]}
+                        {REQUIRED_FIELDS.includes(f) && <span className="required-star">*</span>}
                       </span>
-                      <span
-                        className={`jpd-pv-val${!savedProfile?.[f] ? " jpd-pv-empty" : ""}`}
-                      >
-                        {f === "experience"
-                          ? EXPERIENCE.find(
-                              (x) => x.value === savedProfile?.[f],
-                            )?.label ||
-                            savedProfile?.[f] ||
-                            "—"
-                          : savedProfile?.[f] || "—"}
+                      <span className={`jpd-pv-val${!savedProfile?.[f] ? " jpd-pv-empty" : ""}`}>
+                        {f === "experience" ? EXPERIENCE.find((x) => x.value === savedProfile?.[f])?.label || savedProfile?.[f] || "—" : savedProfile?.[f] || "—"}
                       </span>
                     </div>
                   ))}
-
                   <div className="jpd-btn-row" style={{ marginTop: "18px" }}>
-                    <button
-                      className="jpd-btn-green"
-                      onClick={() => setViewMode("form")}
-                    >
-                      <svg
-                        width="15"
-                        height="15"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                      </svg>
+                    <button className="jpd-btn-green" onClick={() => setViewMode("form")}>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                       Update Profile
                     </button>
                   </div>
-
                   {showDeleteConfirm && (
                     <div className="jpd-delete-banner">
-                      <p>
-                        ⚠️ Are you sure? This will permanently delete your
-                        profile.
-                      </p>
+                      <p>⚠️ Are you sure? This will permanently delete your profile.</p>
                       <div className="jpd-delete-banner-btns">
-                        <button
-                          className="jpd-btn-delete-confirm"
-                          onClick={handleDeleteProfile}
-                        >
-                          Yes, Delete
-                        </button>
-                        <button
-                          className="jpd-btn-outline"
-                          onClick={() => setShowDeleteConfirm(false)}
-                        >
-                          Cancel
-                        </button>
+                        <button className="jpd-btn-delete-confirm" onClick={handleDeleteProfile}>Yes, Delete</button>
+                        <button className="jpd-btn-outline" onClick={() => setShowDeleteConfirm(false)}>Cancel</button>
                       </div>
                     </div>
                   )}
@@ -2131,14 +1304,8 @@ export default function JobProfileDashboard() {
                     <div className="jpd-step-body">
                       <div className="jpd-step-head">
                         <span className="jpd-step-title">{step.title}</span>
-                        <span
-                          className={`jpd-badge${verificationId ? " inprog" : verificationStarted ? " inprog" : ""}`}
-                        >
-                          {verificationId
-                            ? "Pending Review"
-                            : verificationStarted
-                              ? "In Progress"
-                              : "Pending"}
+                        <span className={`jpd-badge${verificationId ? " inprog" : verificationStarted ? " inprog" : ""}`}>
+                          {verificationId ? "Pending Review" : verificationStarted ? "In Progress" : "Pending"}
                         </span>
                       </div>
                       <p className="jpd-step-desc">{step.desc}</p>
@@ -2147,108 +1314,46 @@ export default function JobProfileDashboard() {
                 ))}
 
                 {!verificationId ? (
-  isProfileComplete ? (
-    <button
-      className="jpd-start-btn"
-      onClick={() => {
-        // Store the role
-        const roleToStore = savedProfile?.role || form?.role;
-        if (roleToStore) {
-          sessionStorage.setItem("employee_role", roleToStore);
-        }
-        
-        // Set the verification screen
-        const screen = isCreativeRole(roleToStore) ? "taskupload" : "verification";
-        sessionStorage.setItem("verification_screen", screen);
-        
-        // Set wizard step to 2 (Verification Process)
-        sessionStorage.setItem("wizardStep", "2");
-        
-        // Navigate to EmployeeWizard
-        // If using React Router:
-        // navigate("/employee-wizard");
-        // If using window.location:
-        window.location.href = "/employee-wizard";
-      }}
-    >
-      Start Verification
-    </button>
-  ) : (
-    <button
-      className="jpd-start-btn"
-      disabled={true}
-      style={{ opacity: 0.5, cursor: "not-allowed" }}
-      title="Complete all profile fields (100%) to start verification"
-    >
-      Start Verification
-    </button>
-  )
-) : (
-
-                  <div
-                    style={{
-                      marginTop: 16,
-                      padding: "14px 16px",
-                      background: "#fffbea",
-                      border: "1.5px solid #e8d470",
-                      borderRadius: 12,
-                      textAlign: "center",
-                    }}
-                  >
-                    <p
-                      style={{
-                        fontSize: 14,
-                        fontWeight: 600,
-                        color: "#9a7510",
-                        marginBottom: 4,
-                      }}
-                    >
-                      Verification Submitted
-                    </p>
-                    <p style={{ fontSize: 13, color: "#7a8a7a" }}>
-                      Your profile is currently under review. Our team will get
-                      back to you within <strong>24 hours</strong>.
-                    </p>
+                  isProfileComplete ? (
+                    <button className="jpd-start-btn" onClick={async () => {
+                      const roleToStore = savedProfile?.role || form?.role;
+                      if (roleToStore) sessionStorage.setItem("employee_role", roleToStore);
+                      
+                      // ─── SAVE PENDING TASK - wizard_step = 2 (Started verification) ───
+                      const screen = isCreativeRole(roleToStore) ? "task" : "verification";
+                      await savePendingTask(2, screen, "pending");
+                      
+                      sessionStorage.setItem("verification_screen", screen);
+                      sessionStorage.setItem("wizardStep", "2");
+                      window.location.href = "/employee-wizard";
+                    }}>
+                      Start Verification
+                    </button>
+                  ) : (
+                    <button className="jpd-start-btn" disabled style={{ opacity: 0.5, cursor: "not-allowed" }} title="Complete all profile fields (100%) to start verification">
+                      Start Verification
+                    </button>
+                  )
+                ) : (
+                  <div style={{ marginTop: 16, padding: "14px 16px", background: "#fffbea", border: "1.5px solid #e8d470", borderRadius: 12, textAlign: "center" }}>
+                    <p style={{ fontSize: 14, fontWeight: 600, color: "#9a7510", marginBottom: 4 }}>Verification Submitted</p>
+                    <p style={{ fontSize: 13, color: "#7a8a7a" }}>Your profile is currently under review. Our team will get back to you within <strong>24 hours</strong>.</p>
                   </div>
                 )}
               </div>
 
-              {/* Verification Status Card - Hidden when verification_id exists */}
               {!verificationId && (
                 <div className="jpd-right-card">
                   <div className="jpd-status-head">
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="#d4a017"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <circle cx="12" cy="12" r="10" />
-                      <polyline points="12 6 12 12 16 14" />
-                    </svg>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d4a017" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
                     <h3>Verification Status</h3>
                   </div>
-                  <div
-                    className={`jpd-pill${verificationId ? " inprog" : verificationStarted ? " inprog" : " pending"}`}
-                  >
-                    {verificationId
-                      ? "Pending Review"
-                      : verificationStarted
-                        ? "In Progress"
-                        : "Pending Verification"}
+                  <div className={`jpd-pill${verificationId ? " inprog" : verificationStarted ? " inprog" : " pending"}`}>
+                    {verificationId ? "Pending Review" : verificationStarted ? "In Progress" : "Pending Verification"}
                   </div>
                   <p className="jpd-status-desc">
                     {verificationId ? (
-                      <>
-                        Your verification status is currently{" "}
-                        <strong>Pending</strong>. Our team will review your
-                        submission and get back to you within{" "}
-                        <strong>24 hours</strong>.
-                      </>
+                      <>Your verification status is currently <strong>Pending</strong>. Our team will review your submission and get back to you within <strong>24 hours</strong>.</>
                     ) : verificationStarted ? (
                       "Your verification is underway. We'll notify you once each step is reviewed."
                     ) : (
