@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import Logo from "../../../assets/images/logo1.png";
+import Logo from "../../../assets/images/Changed Logo.png";
 import SummaryApi from "../../../common";
 
 const styles = {
@@ -9,7 +9,7 @@ const styles = {
     background: "#f0f4f0",
     display: "flex",
     flexDirection: "column",
-    alignItems: "center",
+    alignItems: "center", 
     padding: "2rem 1rem 1.5rem",
     fontFamily: "'Segoe UI', sans-serif",
   },

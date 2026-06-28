@@ -351,7 +351,7 @@ export default function CommunicationAssessment({ onBack, onNext, timerExpired, 
       <div style={{ maxWidth: 780, margin: "0 auto", padding: "16px 16px 80px" }}>
         {/* Header */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16, flexWrap: "wrap", gap: 12 }}>
-          <h1 style={styles.title}>Communication Assessment</h1>
+          {/* <h1 style={styles.title}>Communication Assessment</h1> */}
         </div>
 
         {/* Main Card */}
@@ -390,7 +390,7 @@ export default function CommunicationAssessment({ onBack, onNext, timerExpired, 
               backgroundSize: "cover",
               backgroundPosition: "center top",
               backgroundRepeat: "no-repeat",
-              padding: "230px 40px 40px",
+              padding: "250px 40px 40px",
               textAlign: "center",
               display: "flex",
               flexDirection: "column",

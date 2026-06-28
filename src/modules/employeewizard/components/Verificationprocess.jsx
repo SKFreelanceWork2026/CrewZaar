@@ -266,52 +266,59 @@ export default function VerificationProcess({ onBack, onNext, timerExpired, onTi
   };
 
   // NEW: Handle Proceed with API call
-  const handleProceed = async () => {
-    const employeeId = sessionStorage.getItem("employee_id");
+// In VerificationProcess.jsx - UPDATE handleProceed
+const handleProceed = async () => {
+  const employeeId = sessionStorage.getItem("employee_id");
 
-    if (!employeeId) {
-      alert("Employee ID not found. Please try again.");
-      return;
+  if (!employeeId) {
+    alert("Employee ID not found. Please try again.");
+    return;
+  }
+
+  setIsUpdatingTask(true);
+
+  try {
+    const response = await fetch(SummaryApi.createorupdatependingtasks.url, {
+      method: SummaryApi.createorupdatependingtasks.method,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        employee_id: Number(employeeId),
+        pending_task: "communication",
+        wizard_step: 3, // This is Communication step
+        verification_screen: "communication",
+        status: "pending",
+      }),
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      // Update session storage
+      sessionStorage.setItem("wizardStep", "3");
+      sessionStorage.setItem("verification_screen", "communication");
+      
+      // Dispatch events for listeners
+      window.dispatchEvent(new Event("storage"));
+      window.dispatchEvent(new Event("wizardStepChange"));
+
+      // Instead of redirecting to dashboard, go to Communication step
+      // Force a re-render by reloading the wizard
+      window.location.reload();
+      
+      // OR if you want to just navigate within the wizard:
+      // window.location.href = "/employee-wizard?step=3&role=" + sessionStorage.getItem("employee_role");
+    } else {
+      alert(result.message || "Failed to update status. Please try again.");
     }
-
-    setIsUpdatingTask(true);
-
-    try {
-      const response = await fetch(SummaryApi.createorupdatependingtasks.url, {
-        method: SummaryApi.createorupdatependingtasks.method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          employee_id: Number(employeeId),
-          pending_task: "communication",
-          wizard_step: 3,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        // Update session storage
-        sessionStorage.setItem("wizardStep", "3");
-        sessionStorage.setItem("verification_screen", "communication");
-        
-        // Dispatch events for listeners
-        window.dispatchEvent(new Event("storage"));
-        window.dispatchEvent(new Event("wizardStepChange"));
-
-        // Navigate to dashboard
-        window.location.href = "/";
-      } else {
-        alert(result.message || "Failed to update status. Please try again.");
-      }
-    } catch (err) {
-      console.error("Error updating pending task:", err);
-      alert("Unable to continue. Please check your connection.");
-    } finally {
-      setIsUpdatingTask(false);
-    }
-  };
+  } catch (err) {
+    console.error("Error updating pending task:", err);
+    alert("Unable to continue. Please check your connection.");
+  } finally {
+    setIsUpdatingTask(false);
+  }
+};
 
   const allAnswered =
     questions.length > 0 &&
@@ -545,7 +552,7 @@ export default function VerificationProcess({ onBack, onNext, timerExpired, onTi
                 backgroundSize: "cover",
                 backgroundPosition: "center top",
                 backgroundRepeat: "no-repeat",
-                padding: "230px 40px 40px",
+                padding: "250px 40px 40px",
                 textAlign: "center",
                 display: "flex",
                 flexDirection: "column",

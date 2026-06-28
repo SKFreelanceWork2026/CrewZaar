@@ -20,7 +20,6 @@ const generateTaskPDF = (task, employeeName, role) => {
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   
-  // ── Colors ──
   const PRIMARY = '#4CAF0A';
   const PRIMARY_DARK = '#2d7a06';
   const GRAY_100 = '#f8f9fa';
@@ -31,7 +30,6 @@ const generateTaskPDF = (task, employeeName, role) => {
   const RED = '#dc3545';
   const BLUE = '#0d6efd';
   
-  // ── Helper: Add Watermark ──
   const addWatermark = () => {
     doc.setFontSize(60);
     doc.setTextColor(200, 200, 200);
@@ -43,24 +41,19 @@ const generateTaskPDF = (task, employeeName, role) => {
     });
   };
 
-  // ── Header with Logo ──
   const addHeader = () => {
-    // Header background
     doc.setFillColor(PRIMARY);
     doc.rect(0, 0, pageWidth, 45, 'F');
     
-    // Logo - Left side
     try {
       doc.addImage(companyLogo, 'PNG', 15, 8, 30, 30);
     } catch (e) {
-      // Fallback: Text logo if image fails
       doc.setFontSize(22);
       doc.setTextColor(WHITE);
       doc.setFont('helvetica', 'bold');
       doc.text('CREWZAAR', 15, 28);
     }
     
-    // Title - Right side
     doc.setFontSize(16);
     doc.setTextColor(WHITE);
     doc.setFont('helvetica', 'bold');
@@ -70,17 +63,14 @@ const generateTaskPDF = (task, employeeName, role) => {
     doc.setFont('helvetica', 'normal');
     doc.text('Employee Assessment', pageWidth - 15, 30, { align: 'right' });
     
-    // Decorative line
     doc.setDrawColor(WHITE);
     doc.setLineWidth(0.5);
     doc.line(15, 40, pageWidth - 15, 40);
   };
 
-  // ── Footer ──
   const addFooter = () => {
     const footerY = pageHeight - 20;
     
-    // Footer line
     doc.setDrawColor(GRAY_200);
     doc.setLineWidth(0.5);
     doc.line(15, footerY - 8, pageWidth - 15, footerY - 8);
@@ -92,14 +82,12 @@ const generateTaskPDF = (task, employeeName, role) => {
     doc.text('Confidential - For Internal Use Only', pageWidth / 2, footerY + 6, { align: 'center' });
   };
 
-  // ── Content ──
   const addContent = () => {
     let y = 55;
     const leftMargin = 20;
     const rightMargin = pageWidth - 20;
     const contentWidth = rightMargin - leftMargin;
     
-    // ── Document Title ──
     doc.setFontSize(20);
     doc.setTextColor(PRIMARY_DARK);
     doc.setFont('helvetica', 'bold');
@@ -112,7 +100,6 @@ const generateTaskPDF = (task, employeeName, role) => {
     doc.text('Complete the following design task as part of your assessment.', pageWidth / 2, y, { align: 'center' });
     y += 12;
 
-    // ── Info Box ──
     doc.setFillColor(GRAY_100);
     doc.roundedRect(leftMargin, y, contentWidth, 35, 3, 3, 'F');
     doc.setDrawColor(PRIMARY);
@@ -145,14 +132,12 @@ const generateTaskPDF = (task, employeeName, role) => {
     
     y += 42;
 
-    // ── Task Title ──
     doc.setFontSize(14);
     doc.setTextColor(PRIMARY_DARK);
     doc.setFont('helvetica', 'bold');
     doc.text('📋 Task Details', leftMargin, y);
     y += 10;
     
-    // Task Title
     doc.setFontSize(12);
     doc.setTextColor(GRAY_900);
     doc.setFont('helvetica', 'bold');
@@ -161,7 +146,6 @@ const generateTaskPDF = (task, employeeName, role) => {
     doc.text(task?.title || 'E-Commerce Landing Page Design', leftMargin + 25, y);
     y += 8;
 
-    // Task Description
     doc.setFontSize(12);
     doc.setTextColor(GRAY_900);
     doc.setFont('helvetica', 'bold');
@@ -172,7 +156,6 @@ const generateTaskPDF = (task, employeeName, role) => {
     doc.text(splitDesc, leftMargin + 25, y);
     y += splitDesc.length * 6 + 6;
 
-    // ── Requirements Box ──
     doc.setFillColor('#f0fdf4');
     doc.roundedRect(leftMargin, y, contentWidth, 8, 3, 3, 'F');
     doc.setDrawColor(PRIMARY);
@@ -185,7 +168,6 @@ const generateTaskPDF = (task, employeeName, role) => {
     doc.text('📌 Requirements & Deliverables', leftMargin + 8, y + 6);
     y += 16;
 
-    // Requirements list
     const requirements = [
       { icon: '✓', text: 'Hero Section with engaging visuals and CTA' },
       { icon: '✓', text: 'Featured Products carousel/section' },
@@ -206,7 +188,6 @@ const generateTaskPDF = (task, employeeName, role) => {
     
     y += requirements.length * 7 + 12;
 
-    // ── Deliverables ──
     doc.setFillColor('#eff6ff');
     doc.roundedRect(leftMargin, y, contentWidth, 8, 3, 3, 'F');
     doc.setDrawColor(BLUE);
@@ -237,7 +218,6 @@ const generateTaskPDF = (task, employeeName, role) => {
     
     y += deliverables.length * 7 + 12;
 
-    // ── Guidelines ──
     doc.setFontSize(12);
     doc.setTextColor(PRIMARY_DARK);
     doc.setFont('helvetica', 'bold');
@@ -265,7 +245,6 @@ const generateTaskPDF = (task, employeeName, role) => {
     
     y += guidelines.length * 6 + 12;
 
-    // ── Stats Box ──
     const statsY = y;
     const statBoxWidth = (contentWidth - 20) / 4;
     
@@ -297,7 +276,6 @@ const generateTaskPDF = (task, employeeName, role) => {
     
     y += 32;
 
-    // ── Important Note ──
     doc.setFillColor('#fff3cd');
     doc.roundedRect(leftMargin, y, contentWidth, 20, 3, 3, 'F');
     doc.setDrawColor('#ffc107');
@@ -313,7 +291,6 @@ const generateTaskPDF = (task, employeeName, role) => {
     y += 28;
   };
 
-  // ── Build PDF ──
   try {
     addHeader();
     addContent();
@@ -321,7 +298,6 @@ const generateTaskPDF = (task, employeeName, role) => {
     addWatermark();
   } catch (e) {
     console.error('Error generating PDF:', e);
-    // Fallback: Simple PDF with error message
     doc.setFontSize(16);
     doc.setTextColor(RED);
     doc.text('Error generating task details. Please try again.', 20, 50);
@@ -375,6 +351,7 @@ export default function TaskUpload({ onBack, onNext }) {
 
     const handlePopState = () => {
       setShowLeaveAlert(true);
+      // Store the navigation function properly
       setPendingNavigation(() => () => {
         window.history.back();
       });
@@ -396,17 +373,30 @@ export default function TaskUpload({ onBack, onNext }) {
     };
   }, [submitted]);
 
+  // ✅ FIXED: handleLeave - properly executes the pending navigation
   const handleLeave = () => {
     setShowLeaveAlert(false);
+    
+    // Execute the pending navigation if it exists
     if (pendingNavigation) {
+      // Call the stored function
       pendingNavigation();
+      setPendingNavigation(null);
+    } else {
+      // Fallback: use onBack if available, otherwise go to dashboard
+      if (onBack) {
+        onBack();
+      } else {
+        window.location.href = "/employee-wizard";
+      }
     }
-    setPendingNavigation(null);
   };
 
+  // ✅ FIXED: handleStay - properly closes the modal
   const handleStay = () => {
     setShowLeaveAlert(false);
     setPendingNavigation(null);
+    // Push a new state to prevent immediate back navigation
     window.history.pushState(null, "", window.location.href);
   };
 
@@ -518,15 +508,12 @@ export default function TaskUpload({ onBack, onNext }) {
       const result = await response.json();
 
       if (result.success) {
-        // Update session storage
         sessionStorage.setItem("wizardStep", "3");
         sessionStorage.setItem("verification_screen", "communication");
         
-        // Dispatch events for listeners
         window.dispatchEvent(new Event("storage"));
         window.dispatchEvent(new Event("wizardStepChange"));
 
-        // Navigate to next step
         if (onNext) {
           onNext();
         } else {
@@ -583,7 +570,6 @@ export default function TaskUpload({ onBack, onNext }) {
               won't be able to make changes.
             </p>
 
-            {/* File summary */}
             <div style={s.modalFileSummary}>
               <svg
                 width="14"
@@ -644,7 +630,7 @@ export default function TaskUpload({ onBack, onNext }) {
         {/* Header with Logo and Download Button */}
         <div style={s.header}>
           <div style={s.headerLeft}>
-            <img 
+            {/* <img 
               src={companyLogo} 
               alt="Company Logo" 
               style={{ 
@@ -653,8 +639,8 @@ export default function TaskUpload({ onBack, onNext }) {
                 marginRight: 12,
                 objectFit: 'contain'
               }} 
-            />
-            <h1 style={s.headerTitle}>Task Upload</h1>
+            /> */}
+            {/* <h1 style={s.headerTitle}>Task Upload</h1> */}
           </div>
           {!submitted && selectedTask && !loadingTasks && (
             <button 
@@ -717,7 +703,7 @@ export default function TaskUpload({ onBack, onNext }) {
               backgroundSize: "cover",
               backgroundPosition: "center top",
               backgroundRepeat: "no-repeat",
-              padding: "230px 40px 40px",
+              padding: "270px 40px 40px",
               borderRadius: 16,
             }}>
               <h2 style={s.resultTitle}>Task Submitted Successfully! 🎉</h2>

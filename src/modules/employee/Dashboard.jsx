@@ -408,6 +408,38 @@ export default function Dashboard() {
     };
   }, [showResumeModal, isVerified]);
 
+  // ─── Listen for BroadcastChannel messages from wizard ────────────────
+  useEffect(() => {
+    // Create BroadcastChannel to listen for wizard messages
+    const channel = new BroadcastChannel("wizard_channel");
+    
+    channel.onmessage = (event) => {
+      // Check if the message is a step completion or wizard done
+      if (event.data?.type === "STEP_COMPLETED" || event.data?.type === "WIZARD_DONE") {
+        console.log("📡 Dashboard received broadcast:", event.data);
+        
+        const employeeId = sessionStorage.getItem("employee_id");
+        if (employeeId) {
+          // Refetch employee profile and pending tasks
+          fetchEmployeeProfile(employeeId);
+          
+          // Also refetch pending tasks with current employee data
+          const emp = sessionStorage.getItem("employee");
+          if (emp) {
+            const employeeData = JSON.parse(emp);
+            fetchPendingTasks(employeeId, employeeData);
+          }
+        }
+      }
+    };
+
+    // Cleanup: close the channel when component unmounts
+    return () => {
+      channel.close();
+      console.log("📡 BroadcastChannel closed");
+    };
+  }, []); // Empty dependency array - runs once on mount
+
   // ─── Listen for wizard completion events ──────────────────────────
   useEffect(() => {
     const handleWizardComplete = () => {

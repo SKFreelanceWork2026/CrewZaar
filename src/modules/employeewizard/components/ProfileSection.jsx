@@ -4,7 +4,7 @@ import SummaryApi from "../../../common";
 import Taskupload from "../components/Taskupload";
 import VerificationProcess from "../components/Verificationprocess";
 import CommunicationAssessment from "../components/CommunicationAssessment";
-import Logo from "../../../assets/images/logo1.png";
+import Logo from "../../../assets/images/Changed Logo.png";
 
 const ROLES = [
   "Frontend Developer",
