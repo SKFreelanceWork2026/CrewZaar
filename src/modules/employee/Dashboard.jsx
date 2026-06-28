@@ -5,7 +5,7 @@ import {
   Target, Eye, Briefcase, Award, TrendingUp,
   CheckCircle, Calendar, MapPin, BarChart2, Clock,
   Rocket, Lightbulb, Cloud, Plus, ChevronRight,
-  User, BadgeCheck, Star,
+  User, BadgeCheck, Star, Clock as ClockIcon,
 } from "lucide-react";
 import SummaryApi from "../../common/index";
 import Stepper from "../employeewizard/components/Stepper";
@@ -203,6 +203,54 @@ export default function Dashboard() {
   const [pendingTaskData, setPendingTaskData] = useState(null);
   const [isModalReady, setIsModalReady] = useState(false);
   const [modalDismissed, setModalDismissed] = useState(false);
+  const [wizardWindowRef, setWizardWindowRef] = useState(null);
+  
+  // Employee verification status from API
+  const [isVerified, setIsVerified] = useState(false);
+  const [isDocVerified, setIsDocVerified] = useState(false);
+
+  // ─── Fetch Employee Profile Data ──────────────────────────────────
+  const fetchEmployeeProfile = async (employeeId) => {
+    if (!employeeId) return null;
+
+    try {
+      const response = await fetch(SummaryApi.getEmployee.url, {
+        method: SummaryApi.getEmployee.method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ employee_id: employeeId }),
+      });
+
+      if (!response.ok) return null;
+
+      const result = await response.json();
+
+      if (result.success && result.data) {
+        const empData = result.data;
+        
+        // Update verification status - is_verified: 0 or 1
+        const verified = empData.is_verified === 1;
+        setIsVerified(verified);
+        
+        // Store verification status in sessionStorage
+        sessionStorage.setItem("profile_verified", verified ? "1" : "0");
+        
+        // If verified, close the modal
+        if (verified) {
+          setShowResumeModal(false);
+          setIsModalReady(false);
+          setModalDismissed(true);
+          sessionStorage.removeItem("modal_type");
+          sessionStorage.removeItem("wizard_continue_clicked");
+        }
+        
+        return empData;
+      }
+      return null;
+    } catch (error) {
+      console.error("❌ Error fetching employee profile:", error);
+      return null;
+    }
+  };
 
   // ─── Fetch Pending Tasks from API ──────────────────────────────────
   const fetchPendingTasks = async (employeeId, emp) => {
@@ -223,21 +271,62 @@ export default function Dashboard() {
         setPendingTaskData(result.data);
 
         const pendingTask = result.data;
+        const wizardStep = pendingTask.wizard_step;
 
-        // Show modal only if wizard is incomplete (step 1–4) AND modal hasn't been dismissed
-        if (pendingTask.wizard_step >= 1 && pendingTask.wizard_step < 5 && !modalDismissed) {
-          const step = pendingTask.wizard_step;
+        // Check if wizard continue was clicked (survives page reload)
+        const wizardContinueClicked = sessionStorage.getItem("wizard_continue_clicked") === "true";
+        
+        // Get verification status from state or session
+        const isEmployeeVerified = isVerified || sessionStorage.getItem("profile_verified") === "1";
+        
+        // IMPORTANT: If verified, ALWAYS hide the modal
+        if (isEmployeeVerified) {
+          setShowResumeModal(false);
+          setIsModalReady(false);
+          setModalDismissed(true);
+          sessionStorage.removeItem("modal_type");
+          sessionStorage.removeItem("wizard_continue_clicked");
+          return;
+        }
+
+        // LOGIC: Show modal if:
+        // 1. Wizard is incomplete (step 1-4) OR
+        // 2. Wizard is complete (step 5) AND verification is pending (is_verified = 0)
+        const isWizardIncomplete = wizardStep >= 1 && wizardStep < 5;
+        const isWizardComplete = wizardStep === 5;
+        const isVerificationPending = !isEmployeeVerified;
+        
+        let shouldShowModal = false;
+        let modalType = "resume";
+        
+        if (wizardStep >= 1 && wizardStep <= 5) {
+          if (isWizardIncomplete && isVerificationPending && !modalDismissed) {
+            shouldShowModal = true;
+            modalType = "resume";
+          } else if (isWizardComplete && isVerificationPending && !modalDismissed) {
+            shouldShowModal = true;
+            modalType = "waiting";
+          }
+        }
+
+        if (shouldShowModal) {
           const role = emp?.role || sessionStorage.getItem("role") || sessionStorage.getItem("employee_role") || "";
           const steps = getFlowSteps(role);
 
           setFlowSteps(steps);
-          setCurrentIndex(getCurrentFlowIndex(steps, step));
+          setCurrentIndex(getCurrentFlowIndex(steps, wizardStep));
 
-          const current = steps.find((s) => s.wizardStep === step);
-          setCurrentStepLabel(current?.label || `Step ${step}`);
+          const current = steps.find((s) => s.wizardStep === wizardStep);
+          setCurrentStepLabel(current?.label || `Step ${wizardStep}`);
 
+          sessionStorage.setItem("modal_type", modalType);
+          
           setIsModalReady(true);
           setShowResumeModal(true);
+        } else {
+          // If no reason to show modal, hide it
+          setShowResumeModal(false);
+          setIsModalReady(false);
         }
       }
     } catch (error) {
@@ -276,7 +365,16 @@ export default function Dashboard() {
           const employeeId = emp.employee_id || sessionStorage.getItem("employee_id");
 
           if (employeeId) {
-            await fetchPendingTasks(employeeId, emp);
+            // First fetch the full employee profile to get verification status
+            const profileData = await fetchEmployeeProfile(employeeId);
+            
+            // Then fetch pending tasks - pass the updated employee data with is_verified
+            const empWithVerification = {
+              ...emp,
+              is_verified: profileData?.is_verified ?? emp.is_verified ?? 0
+            };
+            
+            await fetchPendingTasks(employeeId, empWithVerification);
           }
         }
       } catch (e) {
@@ -289,31 +387,67 @@ export default function Dashboard() {
     loadEmployeeData();
   }, []);
 
+  // ─── Poll for verification status every 30 seconds ──────────────────
+  useEffect(() => {
+    let pollInterval = null;
+
+    // Only poll if modal is showing and not verified
+    if (showResumeModal && !isVerified) {
+      pollInterval = setInterval(() => {
+        const employeeId = sessionStorage.getItem("employee_id");
+        if (employeeId) {
+          fetchEmployeeProfile(employeeId);
+        }
+      }, 30000); // Check every 30 seconds
+    }
+
+    return () => {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+      }
+    };
+  }, [showResumeModal, isVerified]);
+
   // ─── Listen for wizard completion events ──────────────────────────
   useEffect(() => {
     const handleWizardComplete = () => {
-      // Close modal when wizard is completed
-      setShowResumeModal(false);
-      setIsModalReady(false);
-      setModalDismissed(true);
+      // Refetch employee data to check verification status
+      const employeeId = sessionStorage.getItem("employee_id");
+      if (employeeId) {
+        fetchEmployeeProfile(employeeId);
+      }
     };
 
     const handleWizardStepChange = () => {
       // Check if wizard is complete (step 5)
       const step = parseInt(sessionStorage.getItem("wizardStep") || "0", 10);
       if (step === 5) {
-        setShowResumeModal(false);
-        setIsModalReady(false);
-        setModalDismissed(true);
+        // Refetch employee data to check verification status
+        const employeeId = sessionStorage.getItem("employee_id");
+        if (employeeId) {
+          fetchEmployeeProfile(employeeId);
+        }
+      }
+    };
+
+    // Listen for messages from the wizard window
+    const handleMessage = (event) => {
+      if (event.data && event.data.type === 'WIZARD_CLOSED') {
+        setWizardWindowRef(null);
+        setTimeout(() => {
+          sessionStorage.removeItem("wizard_continue_clicked");
+        }, 300000);
       }
     };
 
     window.addEventListener("wizardComplete", handleWizardComplete);
     window.addEventListener("wizardStepChange", handleWizardStepChange);
+    window.addEventListener("message", handleMessage);
 
     return () => {
       window.removeEventListener("wizardComplete", handleWizardComplete);
       window.removeEventListener("wizardStepChange", handleWizardStepChange);
+      window.removeEventListener("message", handleMessage);
     };
   }, []);
 
@@ -330,7 +464,7 @@ export default function Dashboard() {
     return [];
   };
 
-  // Handle Continue Wizard — opens wizard in new tab at the exact saved step
+  // Handle Continue Wizard — opens wizard in new tab but keeps modal open
   const handleContinueWizard = () => {
     const step       = pendingTaskData?.wizard_step || 1;
     const screen     = pendingTaskData?.verification_screen || "";
@@ -344,45 +478,54 @@ export default function Dashboard() {
       verification_screen: screen,
     });
 
-    // Open wizard in new tab
-    const wizardWindow = window.open(`/employee-wizard?${params.toString()}`, "_blank");
+    // Set flag in sessionStorage to prevent modal from showing again after reload
+    sessionStorage.setItem("wizard_continue_clicked", "true");
     
-    // Close modal immediately when clicking continue
-    setShowResumeModal(false);
-    setIsModalReady(false);
-    setModalDismissed(true);
-
-    // If wizard window was blocked or closed, allow reopening
-    if (!wizardWindow) {
-      // Prompt user to allow popups or open in same tab
+    // Open wizard in new tab
+    const wizardUrl = `/employee-wizard?${params.toString()}`;
+    const newWindow = window.open(wizardUrl, "_blank");
+    
+    if (newWindow) {
+      setWizardWindowRef(newWindow);
+      newWindow.focus();
+      
+      // DO NOT close the modal - keep it open
+      // Only reload the page to check for verification status
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+      
+      return;
+    } else {
+      // If popup was blocked
       if (window.confirm("Please allow popups for this site, or click OK to open in the same tab.")) {
-        window.location.href = `/employee-wizard?${params.toString()}`;
-      } else {
-        // Reopen modal if user cancels
-        setModalDismissed(false);
-        setIsModalReady(true);
-        setShowResumeModal(true);
+        window.location.href = wizardUrl;
       }
     }
 
-    // Set up listener for wizard completion
+    // Set up listener for wizard completion (fallback polling)
     const checkWizardComplete = setInterval(() => {
+      if (wizardWindowRef && wizardWindowRef.closed) {
+        setWizardWindowRef(null);
+        clearInterval(checkWizardComplete);
+        return;
+      }
+      
       const step = parseInt(sessionStorage.getItem("wizardStep") || "0", 10);
       if (step === 5) {
-        setModalDismissed(true);
+        sessionStorage.removeItem("wizard_continue_clicked");
+        setWizardWindowRef(null);
         clearInterval(checkWizardComplete);
+        
+        // Refetch to check if verification is complete
+        const employeeId = sessionStorage.getItem("employee_id");
+        if (employeeId) {
+          fetchEmployeeProfile(employeeId);
+        }
       }
-    }, 1000);
+    }, 2000);
 
-    // Clean up interval after 5 minutes
-    setTimeout(() => clearInterval(checkWizardComplete), 300000);
-  };
-
-  // Handle dismissing the modal (user clicks outside or cancels)
-  const handleDismissModal = () => {
-    setShowResumeModal(false);
-    setIsModalReady(false);
-    setModalDismissed(true);
+    setTimeout(() => clearInterval(checkWizardComplete), 600000);
   };
 
   // ─── LOADING STATE ────────────────────────────────────────────────
@@ -410,11 +553,17 @@ export default function Dashboard() {
   }
 
   const skills = getSkillsArray();
-  const isVerified = sessionStorage.getItem("profile_verified") === "1";
-  const isDocVerified = sessionStorage.getItem("document_verified") === "1";
+  const verified = isVerified || sessionStorage.getItem("profile_verified") === "1";
+  const docVerified = sessionStorage.getItem("document_verified") === "1";
+
+  // Determine modal type from sessionStorage
+  const modalType = sessionStorage.getItem("modal_type") || "resume";
 
   // ─── IF MODAL IS ACTIVE - Show only the modal ──────────────────
   if (showResumeModal && isModalReady) {
+    // Check if this is the "waiting for verification" modal
+    const isWaitingModal = modalType === "waiting" || (pendingTaskData?.wizard_step === 5 && !verified);
+    
     return (
       <>
         {/* Full screen overlay */}
@@ -427,10 +576,9 @@ export default function Dashboard() {
             WebkitBackdropFilter: "blur(12px)",
             zIndex: 9998,
           }}
-          onClick={handleDismissModal}
         />
 
-        {/* Resume Modal */}
+        {/* Modal - COMPACT STYLES APPLIED */}
         <div
           style={{
             position: "fixed",
@@ -438,195 +586,361 @@ export default function Dashboard() {
             left: "50%",
             transform: "translate(-50%, -50%)",
             width: "90%",
-            maxWidth: 820,
+            maxWidth: 720,
             background: "#fff",
             borderRadius: 24,
-            padding: 40,
+            padding: "24px 28px",
             boxShadow: "0 40px 80px rgba(0,0,0,0.25)",
             zIndex: 9999,
-            maxHeight: "90vh",
-            overflowY: "auto",
+            maxHeight: "85vh",
+            overflow: "hidden",
           }}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Close button */}
-          <button
-            onClick={handleDismissModal}
-            style={{
-              position: "absolute",
-              top: 16,
-              right: 16,
-              background: "none",
-              border: "none",
-              fontSize: 24,
-              cursor: "pointer",
-              color: "#9ca3af",
-              padding: 8,
-              borderRadius: 8,
-              transition: "all 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "#f3f4f6";
-              e.currentTarget.style.color = "#374151";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "none";
-              e.currentTarget.style.color = "#9ca3af";
-            }}
-          >
-            ×
-          </button>
 
-          {/* Header */}
-          <div style={{ textAlign: "center", marginBottom: 28 }}>
-            <div style={{
-              width: 72,
-              height: 72,
-              borderRadius: "50%",
-              background: `linear-gradient(135deg, ${GREEN}, #2d7a06)`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              margin: "0 auto 16px",
-            }}>
-              <span style={{ fontSize: 32, color: "#fff" }}>📝</span>
-            </div>
-            <h2
-              style={{
-                fontSize: 28,
-                fontWeight: 700,
-                color: "#111827",
-                marginBottom: 8,
-              }}
-            >
-              Resume Your Application
-            </h2>
-            <p style={{ color: "#6b7280", fontSize: 14, maxWidth: 500, margin: "0 auto" }}>
-              You have an incomplete Employee Wizard. Continue exactly where you left off.
-            </p>
-          </div>
+          {isWaitingModal ? (
+            // ─── WAITING FOR VERIFICATION MODAL (COMPACT) ──────────
+            <>
+              {/* Header - Compact */}
+              <div style={{ textAlign: "center", marginBottom: 18 }}>
+                <div style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: "50%",
+                  background: "linear-gradient(135deg, #f59e0b, #d97706)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 14px",
+                }}>
+                  <ClockIcon size={24} color="#fff" />
+                </div>
+                <h2
+                  style={{
+                    fontSize: 22,
+                    fontWeight: 700,
+                    color: "#111827",
+                    marginBottom: 6,
+                    letterSpacing: "-0.4px",
+                    fontFamily: "'Inter','SF Pro Display','Segoe UI',sans-serif",
+                  }}
+                >
+                  Verification in Progress
+                </h2>
+                <p style={{ 
+                  color: "#6b7280", 
+                  fontSize: 13, 
+                  lineHeight: 1.5,
+                  maxWidth: 460, 
+                  margin: "0 auto",
+                  fontFamily: "'Inter','SF Pro Text','Segoe UI',sans-serif",
+                }}>
+                  You've completed all steps! Our team is reviewing your verification.
+                </p>
+              </div>
 
-          {/* Exact Same Stepper from Employee Wizard */}
-          {flowSteps.length > 0 ? (
-            <Stepper steps={flowSteps} currentIndex={currentIndex} />
+              {/* Timer/Status Card - Compact */}
+              <div
+                style={{
+                  padding: 18,
+                  background: "#fefce8",
+                  borderRadius: 16,
+                  border: "2px solid #fde68a",
+                  textAlign: "center",
+                  marginBottom: 16,
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginBottom: 8 }}>
+                  <div style={{
+                    width: 38,
+                    height: 38,
+                    borderRadius: "50%",
+                    background: "#f59e0b",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}>
+                    <span style={{ fontSize: 18, color: "#fff" }}>⏳</span>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 17, fontWeight: 700, color: "#92400e" }}>
+                      Under Review
+                    </div>
+                    <div style={{ fontSize: 12, color: "#78350f", marginTop: 2 }}>
+                      Estimated completion: <strong>24 hours</strong>
+                    </div>
+                  </div>
+                </div>
+                
+                <div style={{
+                  width: "100%",
+                  height: 6,
+                  background: "#fde68a",
+                  borderRadius: 4,
+                  overflow: "hidden",
+                  marginTop: 8,
+                }}>
+                  <div style={{
+                    width: "60%",
+                    height: "100%",
+                    background: "linear-gradient(90deg, #f59e0b, #d97706)",
+                    borderRadius: 4,
+                    animation: "progressPulse 2s ease-in-out infinite",
+                  }} />
+                </div>
+                
+                <p style={{ 
+                  marginTop: 10, 
+                  fontSize: 12, 
+                  lineHeight: 1.6,
+                  color: "#78350f" 
+                }}>
+                  Our team is carefully reviewing your verification. You'll receive an email notification once complete.
+                </p>
+              </div>
+
+              {/* Steps completed - show all green */}
+              <div style={{ marginTop: 4, marginBottom: 16 }}>
+                <Stepper 
+                  steps={flowSteps.length > 0 ? flowSteps : [
+                    { label: "Verification" },
+                    { label: "Communication" },
+                    { label: "Documents" },
+                    { label: "Complete" },
+                  ]} 
+                  currentIndex={3} 
+                  isLastStepDone={true}
+                />
+              </div>
+
+              {/* Info Box - Compact with clean bullet list */}
+              <div
+                style={{
+                  padding: 14,
+                  background: "#f8fafc",
+                  borderRadius: 12,
+                  border: "1px solid #e5e7eb",
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 10,
+                }}
+              >
+                <div style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: "50%",
+                  background: "#e0f2fe",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                }}>
+                  <span style={{ fontSize: 14 }}>ℹ️</span>
+                </div>
+                <div>
+                  <div style={{ 
+                    fontWeight: 600, 
+                    fontSize: 13, 
+                    color: "#1e293b" 
+                  }}>
+                    What happens next?
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 8,
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 6,
+                      fontSize: 12,
+                      color: "#64748b",
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    <div>✓ Our team will verify your profile and documents</div>
+                    <div>✓ You'll receive an email notification once verified</div>
+                    <div>✓ Your profile will be visible to companies after verification</div>
+                    <div>✓ The modal will automatically close when verification is complete</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Buttons */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: 12,
+                  marginTop: 18,
+                }}
+              >
+                {/* No buttons - just waiting */}
+              </div>
+            </>
           ) : (
-            <div style={{ textAlign: "center", padding: 20, color: "#6b7280" }}>
-              Loading wizard steps...
-            </div>
+            // ─── RESUME WIZARD MODAL (COMPACT) ──────────────────────
+            <>
+              {/* Header - Compact */}
+              <div style={{ textAlign: "center", marginBottom: 18 }}>
+                <div style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: "50%",
+                  background: `linear-gradient(135deg, ${GREEN}, #2d7a06)`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 14px",
+                }}>
+                  <span style={{ fontSize: 24, color: "#fff" }}>📝</span>
+                </div>
+                <h2
+                  style={{
+                    fontSize: 22,
+                    fontWeight: 700,
+                    color: "#111827",
+                    marginBottom: 6,
+                    letterSpacing: "-0.4px",
+                    fontFamily: "'Inter','SF Pro Display','Segoe UI',sans-serif",
+                  }}
+                >
+                  Resume Your Application
+                </h2>
+                <p style={{ 
+                  color: "#6b7280", 
+                  fontSize: 13, 
+                  lineHeight: 1.5,
+                  maxWidth: 460, 
+                  margin: "0 auto",
+                  fontFamily: "'Inter','SF Pro Text','Segoe UI',sans-serif",
+                }}>
+                  You have an incomplete Employee Wizard. Continue exactly where you left off.
+                </p>
+              </div>
+
+              {/* Stepper - Compact */}
+              <div style={{ marginBottom: 16 }}>
+                {flowSteps.length > 0 ? (
+                  <Stepper steps={flowSteps} currentIndex={currentIndex} />
+                ) : (
+                  <div style={{ textAlign: "center", padding: 16, color: "#6b7280", fontSize: 13 }}>
+                    Loading wizard steps...
+                  </div>
+                )}
+              </div>
+
+              {/* Current Step Info - Compact */}
+              <div
+                style={{
+                  marginTop: 18,
+                  padding: 18,
+                  background: "#f8fafc",
+                  borderRadius: 12,
+                  border: "1px solid #e5e7eb",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{
+                    width: 38,
+                    height: 38,
+                    borderRadius: 10,
+                    background: `linear-gradient(135deg, ${GREEN}, #2d7a06)`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}>
+                    <span style={{ fontSize: 16, color: "#fff" }}>📍</span>
+                  </div>
+                  <div>
+                    <div style={{ 
+                      fontWeight: 600, 
+                      color: "#374151", 
+                      fontSize: 12 
+                    }}>
+                      Current Step
+                    </div>
+                    <div style={{ 
+                      color: GREEN, 
+                      fontSize: 17, 
+                      fontWeight: 700 
+                    }}>
+                      {currentStepLabel || "Loading..."}
+                    </div>
+                  </div>
+                </div>
+                <p style={{ 
+                  marginTop: 10, 
+                  color: "#6b7280", 
+                  fontSize: 12, 
+                  lineHeight: 1.6, 
+                  paddingLeft: 48 
+                }}>
+                  Click <strong>Continue</strong> to resume your onboarding. The Employee Wizard will open in a new tab from your saved step.
+                </p>
+              </div>
+
+              {/* Buttons - Only Continue button */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: 12,
+                  marginTop: 18,
+                }}
+              >
+                <button
+                  onClick={handleContinueWizard}
+                  style={{
+                    background: GREEN,
+                    color: "#fff",
+                    border: "none",
+                    padding: "12px 40px",
+                    borderRadius: 12,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    fontSize: 15,
+                    transition: "all 0.2s",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    boxShadow: "0 4px 16px rgba(76, 175, 10, 0.35)",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = "#3d9e00";
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                    e.currentTarget.style.boxShadow = "0 6px 24px rgba(76, 175, 10, 0.45)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = GREEN;
+                    e.currentTarget.style.transform = "translateY(0)";
+                    e.currentTarget.style.boxShadow = "0 4px 16px rgba(76, 175, 10, 0.35)";
+                  }}
+                >
+                  Continue to Wizard →
+                </button>
+              </div>
+
+              {/* Info text at bottom */}
+              <div
+                style={{
+                  textAlign: "center",
+                  marginTop: 12,
+                  fontSize: 12,
+                  color: "#9ca3af",
+                }}
+              >
+                You must complete your wizard to access the dashboard
+              </div>
+            </>
           )}
-
-          {/* Current Step Info */}
-          <div
-            style={{
-              marginTop: 28,
-              padding: 20,
-              background: "#f8fafc",
-              borderRadius: 12,
-              border: "1px solid #e5e7eb",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{
-                width: 40,
-                height: 40,
-                borderRadius: 10,
-                background: `linear-gradient(135deg, ${GREEN}, #2d7a06)`,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-              }}>
-                <span style={{ fontSize: 18, color: "#fff" }}>📍</span>
-              </div>
-              <div>
-                <div style={{ fontWeight: 600, color: "#374151", fontSize: 13 }}>
-                  Current Step
-                </div>
-                <div style={{ color: GREEN, fontSize: 18, fontWeight: 700 }}>
-                  {currentStepLabel || "Loading..."}
-                </div>
-              </div>
-            </div>
-            <p style={{ marginTop: 14, color: "#6b7280", fontSize: 13, lineHeight: 1.6, paddingLeft: 52 }}>
-              Click <strong>Continue</strong> to resume your onboarding. The Employee Wizard will open in a new tab from your saved step.
-            </p>
-          </div>
-
-          {/* Buttons */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              gap: 12,
-              marginTop: 28,
-            }}
-          >
-            <button
-              onClick={handleDismissModal}
-              style={{
-                padding: "14px 32px",
-                borderRadius: 12,
-                border: "1.5px solid #d1d5db",
-                background: "#fff",
-                color: "#374151",
-                fontWeight: 600,
-                cursor: "pointer",
-                fontSize: 15,
-                transition: "all 0.2s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "#f3f4f6";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "#fff";
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleContinueWizard}
-              style={{
-                background: GREEN,
-                color: "#fff",
-                border: "none",
-                padding: "14px 48px",
-                borderRadius: 12,
-                fontWeight: 700,
-                cursor: "pointer",
-                fontSize: 16,
-                transition: "all 0.2s",
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                boxShadow: "0 4px 16px rgba(76, 175, 10, 0.35)",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "#3d9e00";
-                e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow = "0 6px 24px rgba(76, 175, 10, 0.45)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = GREEN;
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.boxShadow = "0 4px 16px rgba(76, 175, 10, 0.35)";
-              }}
-            >
-              Continue to Wizard →
-            </button>
-          </div>
-
-          {/* Info text at bottom */}
-          <div
-            style={{
-              textAlign: "center",
-              marginTop: 16,
-              fontSize: 12,
-              color: "#9ca3af",
-            }}
-          >
-            You must complete your wizard to access the dashboard
-          </div>
         </div>
+
+        <style>{`
+          @keyframes progressPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+          }
+        `}</style>
       </>
     );
   }
@@ -648,7 +962,7 @@ export default function Dashboard() {
         <StatCard icon={Eye} iconBg="#eff6ff" iconColor="#3b82f6" label="Profile Views" value="247" delta="+12%" />
         <StatCard icon={Briefcase} iconBg="#fff7ed" iconColor="#ea580c" label="Hiring Requests" value="15" delta="+8%" />
         <StatCard icon={Award} iconBg="#fdf4ff" iconColor="#a855f7" label="Skill Score" value="89%" />
-        <StatCard icon={TrendingUp} iconBg="#f0fdf4" iconColor="#22c55e" label="Visibility" value="A+" badge="High" />
+        <StatCard icon={TrendingUp} iconBg="#f0fdf4" iconColor="#22c55e" label="Visibility" value={verified ? "A+" : "Pending"} badge={verified ? "High" : "Verification"} />
       </div>
 
       {/* ── 3-COLUMN GRID ── */}
@@ -669,7 +983,8 @@ export default function Dashboard() {
               <div style={{ fontWeight: 700, fontSize: 17, color: "#111827" }}>{employee.full_name}</div>
               <div style={{ color: "#6b7280", fontSize: 13, margin: "4px 0 10px" }}>{getRoleDisplay()}</div>
               <div style={{ display: "flex", justifyContent: "center", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
-                {isVerified && <Badge color={GREEN} bg="#edffd6"><CheckCircle size={11} /> Verified</Badge>}
+                {verified && <Badge color={GREEN} bg="#edffd6"><CheckCircle size={11} /> Verified</Badge>}
+                {!verified && <Badge color="#f59e0b" bg="#fefce8"><ClockIcon size={11} /> Pending Verification</Badge>}
                 {employee.member_type_id && <Badge color="#3b82f6" bg="#eff6ff">IT Department</Badge>}
               </div>
               <div style={{ marginBottom: 14 }}>
@@ -688,18 +1003,19 @@ export default function Dashboard() {
           {/* Verification */}
           <Card>
             <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 16 }}>Verification Status</div>
-            <VerificationItem label="Skill Test" sub="Score: 89%" done={isVerified} />
-            <VerificationItem label="Task Evaluation" sub="Completed" done={isVerified} />
-            <VerificationItem label="Communication Test" sub="Score: 92%" done={isVerified} />
-            <VerificationItem label="Background Verification" sub={isDocVerified ? "Verified" : "Pending"} done={isDocVerified} />
-            {isVerified ? (
+            <VerificationItem label="Skill Test" sub="Score: 89%" done={verified} />
+            <VerificationItem label="Task Evaluation" sub="Completed" done={verified} />
+            <VerificationItem label="Communication Test" sub="Score: 92%" done={verified} />
+            <VerificationItem label="Background Verification" sub={docVerified ? "Verified" : "Pending"} done={docVerified} />
+            {verified ? (
               <div style={{ background: "#f3ffe6", border: "1px solid #c8f59a", borderRadius: 10, padding: "10px 12px", fontSize: 12, color: "#2d7a06", display: "flex", gap: 8, alignItems: "flex-start" }}>
                 <BadgeCheck size={15} color={GREEN} style={{ flexShrink: 0, marginTop: 1 }} />
                 Congratulations! You are fully verified and visible to top companies.
               </div>
             ) : (
-              <div style={{ background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 10, padding: "10px 12px", fontSize: 12, color: "#92400e" }}>
-                Complete verification to get visible to top companies.
+              <div style={{ background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 10, padding: "10px 12px", fontSize: 12, color: "#92400e", display: "flex", gap: 8, alignItems: "flex-start" }}>
+                <ClockIcon size={15} color="#d97706" style={{ flexShrink: 0, marginTop: 1 }} />
+                Complete verification to get visible to top companies. Usually takes <strong>24 hours</strong>.
               </div>
             )}
           </Card>
@@ -712,7 +1028,7 @@ export default function Dashboard() {
               { label: "Skills & Tests", val: 90 },
               { label: "Experience", val: 92 },
               { label: "Projects", val: 88 },
-              { label: "Verification", val: isVerified ? 100 : 40 },
+              { label: "Verification", val: verified ? 100 : 40 },
             ].map((s, i) => (
               <div key={i} style={{ marginBottom: 11 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 3 }}>
@@ -826,9 +1142,9 @@ export default function Dashboard() {
           <Card>
             <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 14 }}>Quick Stats</div>
             {[
-              { icon: BarChart2, label: "Profile Rank", value: "Top 5%", color: "#8b5cf6" },
+              { icon: BarChart2, label: "Profile Rank", value: verified ? "Top 5%" : "Pending", color: verified ? "#8b5cf6" : "#f59e0b" },
               { icon: Clock, label: "Avg. Response", value: "2 hours", color: "#3b82f6" },
-              { icon: Target, label: "Match Rate", value: "94%", color: GREEN },
+              { icon: Target, label: "Match Rate", value: verified ? "94%" : "N/A", color: verified ? GREEN : "#f59e0b" },
             ].map(({ icon: Icon, label, value, color }, i) => (
               <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: i < 2 ? 14 : 0 }}>
                 <span style={{ fontSize: 13, color: "#6b7280", display: "flex", alignItems: "center", gap: 7 }}>

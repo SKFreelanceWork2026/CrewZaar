@@ -160,23 +160,23 @@ function getWizardInfo() {
 //  WIZARD RESUME MODAL
 // ─────────────────────────────────────────────────────────
 function WizardResumeModal({ wizardInfo, onDismiss }) {
-const handleProceed = () => {
-  const employeeId = sessionStorage.getItem("employee_id");
-  const employeeRole = sessionStorage.getItem("employee_role") 
-    || sessionStorage.getItem("role") || "";
-  const step = wizardInfo?.savedStep || 1;
-  const screen = sessionStorage.getItem("verification_screen") || "";
+  const handleProceed = () => {
+    const employeeId = sessionStorage.getItem("employee_id");
+    const employeeRole = sessionStorage.getItem("employee_role") 
+      || sessionStorage.getItem("role") || "";
+    const step = wizardInfo?.savedStep || 1;
+    const screen = sessionStorage.getItem("verification_screen") || "";
 
-  const params = new URLSearchParams({
-    step,
-    role: employeeRole,
-    employee_id: employeeId || "",
-    verification_screen: screen,
-  });
+    const params = new URLSearchParams({
+      step,
+      role: employeeRole,
+      employee_id: employeeId || "",
+      verification_screen: screen,
+    });
 
-  window.open(`/employee-wizard?${params.toString()}`, "_blank");
-  onDismiss();
-};
+    window.open(`/employee-wizard?${params.toString()}`, "_blank");
+    onDismiss();
+  };
 
   return (
     <div style={{
@@ -474,40 +474,35 @@ const BackButton = styled(Button)({
 });
 
 // ─────────────────────────────────────────────────────────
-//  TOAST
+//  TOAST - with "x" close button, NO auto-hide
 // ─────────────────────────────────────────────────────────
 function Toast({ message, visible, onClose, severity = "error" }) {
   return (
     <Snackbar
       open={visible}
-      autoHideDuration={4000}
-      onClose={onClose}
       anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      autoHideDuration={null} // Never auto close
+      onClose={(event, reason) => {
+        // Prevent closing when clicking outside
+        if (reason === "clickaway") return;
+      }}
       sx={{
         position: "fixed",
         top: "20px !important",
         left: "50% !important",
         transform: "translateX(-50%) !important",
-        width: "auto", maxWidth: "90%", minWidth: "300px",
         zIndex: 99999,
       }}
     >
       <Alert
-        onClose={onClose}
         severity={severity}
+        onClose={onClose} // Only closes when X is clicked
+        variant="filled"
         sx={{
-          width: "100%",
-          backgroundColor: severity === "success" ? "#1a4d00" : "#d32f2f",
-          color: "#fff", borderRadius: 12, fontWeight: 600, fontSize: 14,
-          boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
-          "& .MuiAlert-icon": { color: "#fff", fontSize: 20 },
-          "& .MuiAlert-message": { display: "flex", alignItems: "center", padding: "4px 0" },
-          "& .MuiAlert-action": {
-            padding: "4px 0",
-            "& .MuiIconButton-root": {
-              color: "#fff",
-              "&:hover": { backgroundColor: "rgba(255,255,255,0.1)" },
-            },
+          minWidth: 350,
+          fontWeight: 600,
+          "& .MuiAlert-action .MuiIconButton-root": {
+            color: "#fff",
           },
         }}
       >
@@ -516,7 +511,6 @@ function Toast({ message, visible, onClose, severity = "error" }) {
     </Snackbar>
   );
 }
-
 // ─────────────────────────────────────────────────────────
 //  TIMER RING
 // ─────────────────────────────────────────────────────────
@@ -927,8 +921,15 @@ export default function LoginModal({ open = true, onClose = () => {}, onLoginSuc
         sessionStorage.setItem("login_phone", mobile);
         sessionStorage.setItem("login_member_id", data.data.member_id);
         setEmployeeData(data.data);
-        if (data.data.otp) console.log("OTP for testing:", data.data.otp);
-        showToast(`OTP sent to +91 ${mobile.slice(0, 2)}****${mobile.slice(-4)}`, "success");
+        
+        // ── SHOW OTP IN TOAST (NO AUTO-HIDE) ──
+        let otpMessage = `✅ OTP sent to +91 ${mobile.slice(0, 2)}****${mobile.slice(-4)}`;
+        if (data.data.otp) {
+          otpMessage = `🔑 Your OTP: ${data.data.otp} — sent to +91 ${mobile.slice(0, 2)}****${mobile.slice(-4)}`;
+          console.log("📱 OTP for testing:", data.data.otp);
+        }
+        showToast(otpMessage, "success");
+        
         setStep("otp");
       } else {
         showToast(data.message || "Mobile number not found. Please check and try again.", "error");
@@ -942,56 +943,64 @@ export default function LoginModal({ open = true, onClose = () => {}, onLoginSuc
   };
 
   // ── Verify OTP ──
-  const handleVerifyOTP = async (otpCode) => {
-    setIsLoading(true);
-    try {
-      const phone = sessionStorage.getItem("login_phone");
-      if (!phone) {
-        showToast("Session expired. Please try again.", "error");
-        setStep("form");
-        return;
-      }
-
-      const response = await fetch(SummaryApi.VerifyOTP.url, {
-        method: SummaryApi.VerifyOTP.method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone, otp: otpCode }),
-      });
-      const data = await response.json();
-
-      if (data.success) {
-        const employee = data.data;
-        sessionStorage.setItem("member_id", employee.member_id || "");
-        sessionStorage.setItem("member_type_id", employee.member_type_id || "");
-        sessionStorage.setItem("employee_id", employee.employee_id || "");
-        sessionStorage.setItem("full_name", employee.full_name || "");
-        sessionStorage.setItem("role", employee.role || "");
-        sessionStorage.setItem("email", employee.email || "");
-        sessionStorage.setItem("phone", employee.phone || "");
-        sessionStorage.setItem("username", employee.username || "");
-        sessionStorage.setItem("skills", employee.skills || "");
-        sessionStorage.setItem("notice_period", employee.notice_period || "");
-        sessionStorage.setItem("preferred_work_mode", employee.preferred_work_mode || "");
-        sessionStorage.setItem("profile_image", employee.profile_image || "");
-        sessionStorage.setItem("document_verified", employee.document_verified || 0);
-        sessionStorage.setItem("profile_verified", employee.profile_verified || 0);
-        sessionStorage.setItem("employee", JSON.stringify(employee));
-        sessionStorage.setItem("isAuthenticated", "true");
-        sessionStorage.removeItem("login_phone");
-        sessionStorage.removeItem("login_member_id");
-
-        showToast(`Welcome ${employee.full_name || "Employee"}!`, "success");
-        setStep("success");
-      } else {
-        showToast(data.message || "Invalid OTP. Please try again.", "error");
-      }
-    } catch (error) {
-      console.error("OTP verification error:", error);
-      showToast("Server Error. Please try again.", "error");
-    } finally {
-      setIsLoading(false);
+// ── Verify OTP ──
+const handleVerifyOTP = async (otpCode) => {
+  setIsLoading(true);
+  try {
+    const phone = sessionStorage.getItem("login_phone");
+    if (!phone) {
+      showToast("Session expired. Please try again.", "error");
+      setStep("form");
+      return;
     }
-  };
+
+    const response = await fetch(SummaryApi.VerifyOTP.url, {
+      method: SummaryApi.VerifyOTP.method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone, otp: otpCode }),
+    });
+    const data = await response.json();
+
+    if (data.success) {
+      const employee = data.data;
+      sessionStorage.setItem("member_id", employee.member_id || "");
+      sessionStorage.setItem("member_type_id", employee.member_type_id || "");
+      sessionStorage.setItem("employee_id", employee.employee_id || "");
+      sessionStorage.setItem("full_name", employee.full_name || "");
+      sessionStorage.setItem("role", employee.role || "");
+      sessionStorage.setItem("email", employee.email || "");
+      sessionStorage.setItem("phone", employee.phone || "");
+      sessionStorage.setItem("username", employee.username || "");
+      sessionStorage.setItem("skills", employee.skills || "");
+      sessionStorage.setItem("notice_period", employee.notice_period || "");
+      sessionStorage.setItem("preferred_work_mode", employee.preferred_work_mode || "");
+      sessionStorage.setItem("profile_image", employee.profile_image || "");
+      sessionStorage.setItem("document_verified", employee.document_verified || 0);
+      sessionStorage.setItem("profile_verified", employee.profile_verified || 0);
+      sessionStorage.setItem("employee", JSON.stringify(employee));
+      sessionStorage.setItem("isAuthenticated", "true");
+      sessionStorage.removeItem("login_phone");
+      sessionStorage.removeItem("login_member_id");
+
+      // Close the OTP toast only after successful verification
+      handleToastClose();
+
+      setStep("success");
+
+      // Optional: show welcome message after OTP toast is closed
+      setTimeout(() => {
+        showToast(`🎉 Welcome ${employee.full_name || "Employee"}!`, "success");
+      }, 200);
+    } else {
+      showToast(data.message || "Invalid OTP. Please try again.", "error");
+    }
+  } catch (error) {
+    console.error("OTP verification error:", error);
+    showToast("Server Error. Please try again.", "error");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   // ── Resend OTP ──
   const handleResendOTP = async () => {
@@ -1012,8 +1021,12 @@ export default function LoginModal({ open = true, onClose = () => {}, onLoginSuc
       const data = await response.json();
 
       if (data.success) {
-        if (data.data?.otp) console.log("New OTP:", data.data.otp);
-        showToast(`OTP resent to +91 ${phone.slice(0, 2)}****${phone.slice(-4)}`, "success");
+        let otpMessage = `✅ OTP resent to +91 ${phone.slice(0, 2)}****${phone.slice(-4)}`;
+        if (data.data?.otp) {
+          otpMessage = `🔑 New OTP: ${data.data.otp} — resent to +91 ${phone.slice(0, 2)}****${phone.slice(-4)}`;
+          console.log("📱 New OTP:", data.data.otp);
+        }
+        showToast(otpMessage, "success");
       } else {
         showToast(data.message || "Failed to resend OTP. Please try again.", "error");
       }
