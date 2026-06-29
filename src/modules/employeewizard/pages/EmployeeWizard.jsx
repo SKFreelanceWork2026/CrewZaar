@@ -317,7 +317,7 @@ const EmployeeWizard = () => {
             </div>
 
             {/* ── Timer ── */}
-            {(step === 2 || step === 3) && (
+            {(step === 2 || step === 3) && !isTaskUploadRole && (
               <div style={{
                 display: "flex",
                 alignItems: "center",

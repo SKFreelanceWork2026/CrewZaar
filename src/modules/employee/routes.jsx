@@ -4,6 +4,13 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Login from "./Login";
 import Layout from "./components/Layout";
 import Dashboard from "../employee/Dashboard";
+import Profile from "../employee/Profile";
+import SkillAssessment from "../employee/Skillassessment";
+
+import JobInvitations from "../employee/Jobinvitations";
+import AppliedJobs from "../employee/Appliedjobs";
+import Portfolio from "../employee/Portfolio";
+
 
 /**
  * ProtectedRoute — re-checks sessionStorage every time the location
@@ -59,10 +66,12 @@ const EmployeeRoutes = () => {
         }
       >
         <Route path="/dashboard" element={<Dashboard />} />
-        {/* Add other protected routes here, e.g.:
         <Route path="/profile" element={<Profile />} />
-        <Route path="/skill-test" element={<SkillTest />} />
-        */}
+        <Route path="/skill-test" element={<SkillAssessment />} />
+        <Route path="/job-invitations" element={<JobInvitations />} />
+        <Route path="/applied-jobs" element={<AppliedJobs />} />
+        <Route path="/my-works" element={<Portfolio />} />
+
       </Route>
 
       {/* Catch-all — log what path slipped through, then send home */}
